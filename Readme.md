@@ -1,7 +1,7 @@
 # Личный проект «Киноман» [![Build status][travis-image]][travis-url]
 
 * Студент: [Александр Арнаутов](https://up.htmlacademy.ru/ecmascript/11/user/649599).
-* Наставник: `Неизвестно`.
+* Наставник: Владимир Чебаков.
 
 ---
 

@@ -297,9 +297,9 @@ render(moveisList, createMoreMoviesButtonTamplate(), `beforeend`);
 render(movies, createTopListTemplate(), `beforeend`);
 render(movies, createMostCommentsListTemplate(), `beforeend`);
 
-const listExtra = movies.querySelectorAll(`.films-list--extra`);
+const listsExtra = movies.querySelectorAll(`.films-list--extra`);
 
-listExtra.forEach((elem) => {
+listsExtra.forEach((elem) => {
   const elemContainer = elem.querySelector(`.films-list__container`);
   for (let i = 0; i < QUANTITY_MOVIES_EXTRA; i++) {
     render(elemContainer, createMovieTamplate(), `beforeend`);
@@ -314,33 +314,32 @@ const commentsMovie = movies.querySelectorAll(`.film-card__comments`);
 
 const openPopup = () => {
 
-  if (body.querySelector(`.film-details`)) {
-    body.querySelector(`.film-details`).remove();
-  }
+  if (!body.querySelector(`.film-details`)) {
 
-  render(body, createPopupDetailsTemplate(), `beforeend`);
+    render(body, createPopupDetailsTemplate(), `beforeend`);
 
-  const popup = body.querySelector(`.film-details`);
-  const closeBtn = popup.querySelector(`.film-details__close-btn`);
+    const popup = body.querySelector(`.film-details`);
+    const closeBtn = popup.querySelector(`.film-details__close-btn`);
 
-  const closePopup = () => {
-    popup.remove();
-    closeBtn.removeEventListener(`click`, onCloseBtnClick);
-    document.removeEventListener(`keydown`, onCloseBtnKeydown);
-  };
+    const closePopup = () => {
+      popup.remove();
+      closeBtn.removeEventListener(`click`, onCloseBtnClick);
+      document.removeEventListener(`keydown`, onCloseBtnKeydown);
+    };
 
-  const onCloseBtnClick = () => {
-    closePopup();
-  };
-
-  const onCloseBtnKeydown = (e) => {
-    if (e.key === ESC_KEY) {
+    const onCloseBtnClick = () => {
       closePopup();
-    }
-  };
+    };
 
-  closeBtn.addEventListener(`click`, onCloseBtnClick);
-  document.addEventListener(`keydown`, onCloseBtnKeydown);
+    const onCloseBtnKeydown = (e) => {
+      if (e.key === ESC_KEY) {
+        closePopup();
+      }
+    };
+
+    closeBtn.addEventListener(`click`, onCloseBtnClick);
+    document.addEventListener(`keydown`, onCloseBtnKeydown);
+  }
 };
 
 
@@ -355,5 +354,3 @@ const watchClickElementsCard = (elements) => {
 watchClickElementsCard(titleMovie);
 watchClickElementsCard(posterMovie);
 watchClickElementsCard(commentsMovie);
-
-

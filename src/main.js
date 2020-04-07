@@ -7,6 +7,7 @@ import {createMoreMoviesButtonTamplate} from './commponents/button-more';
 import {createTopListTemplate} from './commponents/list-top';
 import {createMostCommentsListTemplate} from './commponents/list-most';
 import {createPopupDetailsTemplate} from './commponents/popup';
+import './mock/card';
 
 
 const QUANTITY_MOVIES = 5;

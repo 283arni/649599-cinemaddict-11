@@ -1,4 +1,5 @@
-export const createPopupDetailsTemplate = () => {
+export const createPopupDetailsTemplate = (card) => {
+  console.log( card)
   return (
     `<section class="film-details">
       <form class="film-details__inner" action="" method="get">

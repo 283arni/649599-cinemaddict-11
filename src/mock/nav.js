@@ -1,18 +1,21 @@
-const NavigationItems = {
-  all: `All moveisList`,
+const MAX_AMOUNT_MOVIES = 10;
+
+const navList = {
+  all: `All moveis`,
   watchlist: `Watchlist`,
   history: `History`,
   favorites: `Favorites`
 };
 
 const fillMenuItems = () => {
-  const arr = Object.entries(NavigationItems);
+  const arr = Object.entries(navList);
 
-  return arr.map((it) => {
+  return arr.map((navItem) => {
+    const [id, text] = navItem;
     return {
-      id: it[0],
-      text: it[1],
-      count: Math.floor(Math.random() * 10)
+      id,
+      text,
+      count: Math.floor(Math.random() * MAX_AMOUNT_MOVIES)
     };
   });
 };

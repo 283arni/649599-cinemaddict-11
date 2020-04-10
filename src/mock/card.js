@@ -1,6 +1,20 @@
-const jenres = [`comedy`, `mystery`, `drama`, `cartoon`, `western`, `musical`];
+const Amount = {
+  DAYS: 30,
+  MONTHS: 12,
+  YEARS: 99,
+  RATING: 100,
+  DIVISOR_RATING: 10,
+  MAX_COMENTS: 6,
+  HOURS: 3,
+  MINUTES: 60,
+  MAX_SENTENCES: 5
+};
 
-const Posters = {
+const genres = [`comedy`, `mystery`, `drama`, `cartoon`, `western`, `musical`];
+
+const months = [`January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`, `December`];
+
+const sourcePosterMovies = {
   'Made for each other': `./images/posters/made-for-each-other.png`,
   'Popeye the Sailor Meets Sindbad the Sailor': `./images/posters/popeye-meets-sinbad.png`,
   'Sagebrush Trail': `./images/posters/sagebrush-trail.jpg`,
@@ -13,17 +27,15 @@ const Posters = {
 const description = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus`;
 
 const randomCountComments = () => {
-  return Math.floor(Math.random() * 6);
+  return Math.floor(Math.random() * Amount.MAX_COMENTS);
 };
 
-const randomPosters = (arr) => {
-  const postersArray = Object.entries(arr);
-
-  return postersArray[Math.floor(Math.random() * postersArray.length)];
+const generateDate = (namesMonths) => {
+  return `${Math.floor(Math.random() * Amount.DAYS)} ${namesMonths[Math.floor(Math.random() * Amount.MONTHS)]} 19${Math.floor(Math.random() * Amount.YEARS)}`;
 };
 
-const randomJenre = (jenresArray) => {
-  return jenresArray[Math.floor(Math.random() * jenresArray.length)];
+const randomValue = (arrayValues) => {
+  return arrayValues[Math.floor(Math.random() * arrayValues.length)];
 };
 
 const getTimeMovie = (hour, minute) => {
@@ -31,29 +43,36 @@ const getTimeMovie = (hour, minute) => {
 };
 
 const getRating = () => {
-  return Math.floor(Math.random() * 100) / 10;
+  return Math.floor(Math.random() * Amount.RATING) / Amount.DIVISOR_RATING;
 };
 
 const sliceDescription = (str) => {
 
-  const newStr = str.split(`.`);
+  const newStr = str.split(`. `);
   const indexBegin = Math.ceil(Math.random() * newStr.length - 1);
-  const indexFinal = Math.floor(Math.random() * 5);
+  const indexFinal = Math.floor(Math.random() * Amount.MAX_SENTENCES);
 
-  return `${newStr.filter((it, i) => i >= indexBegin && i <= indexBegin + indexFinal).join(`.`)}.`;
+  return `${newStr.filter((string, i) => i >= indexBegin && i <= indexBegin + indexFinal).join(`. `)}.`;
 };
 
+const posters = Object.entries(sourcePosterMovies);
+
 const generateCard = () => {
-  const movie = randomPosters(Posters);
+  const [title, poster] = randomValue(posters);
 
   return {
-    title: movie[0],
-    poster: movie[1],
-    jenre: randomJenre(jenres),
-    rating: getRating(),
-    time: getTimeMovie(3, 60),
-    description: sliceDescription(description),
-    countComments: randomCountComments(),
+    'title': title,
+    'poster': poster,
+    'director': `Anthony Mann`,
+    'writers': `Anne Wigton, Heinz Herald, Richard Weil`,
+    'actors': `Erich von Stroheim, Mary Beth Hughes, Dan Duryea`,
+    'rating': getRating(),
+    'release date': generateDate(months),
+    'time': getTimeMovie(Amount.HOURS, Amount.MINUTES),
+    'country': `USA`,
+    'description': sliceDescription(description),
+    'countComments': randomCountComments(),
+    'genre': randomValue(genres),
   };
 };
 

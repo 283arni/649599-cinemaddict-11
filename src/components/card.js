@@ -1,5 +1,5 @@
 export const createMovieTamplate = (card) => {
-  const {title, poster, jenre, rating, time, description, countComments} = card;
+  const {title, poster, genre, rating, time, description, countComments} = card;
 
 
   return (
@@ -9,7 +9,7 @@ export const createMovieTamplate = (card) => {
       <p class="film-card__info">
         <span class="film-card__year">1945</span>
         <span class="film-card__duration">${time}</span>
-        <span class="film-card__genre">${jenre}</span>
+        <span class="film-card__genre">${genre}</span>
       </p>
       <img src="${poster}" alt="" class="film-card__poster">
       <p class="film-card__description">${description}</p>

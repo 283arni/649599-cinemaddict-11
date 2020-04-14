@@ -1,15 +1,16 @@
-import {createRankTemplate} from './components/rank';
-import {createStatisticTamplate} from './components/nav';
-import {createSortTamplate} from './components/sort';
-import {createContentTamplate} from './components/content';
-import {createMovieTamplate} from './components/card';
-import {createMoreMoviesButtonTamplate} from './components/button-more';
-import {createTopListTemplate} from './components/list-top';
-import {createMostCommentsListTemplate} from './components/list-most';
-import {createPopupDetailsTemplate} from './components/popup';
-import {craeteAmountMoviesTemplate} from './components/amount-all-movies';
+import RankComponent from './components/rank';
+import NavComponent from './components/nav';
+import SortComponent from './components/sort';
+import ContentComponent from './components/content';
+import CardComponent from './components/card';
+import ButtonMoreComponent from './components/button-more';
+import ListTopComponent from './components/list-top';
+import ListMostComponent from './components/list-most';
+import PopupComponent from './components/popup';
+import AmountMoviesComponent from './components/amount-all-movies';
 import {generateCards} from './mock/card';
 import {fillMenuItems} from './mock/nav';
+import {PositionElement, render} from './utils';
 
 const Quantity = {
   MOVIES: 22,
@@ -26,20 +27,17 @@ const header = document.querySelector(`.header`);
 const main = document.querySelector(`.main`);
 const footerStatistics = document.querySelector(`.footer__statistics`);
 
-const render = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
 
-const openPopup = (card, commentaries) => {
+const openPopup = (card) => {
   if (!body.querySelector(`.film-details`)) {
+    const popupComponent = new PopupComponent(card);
 
-    render(body, createPopupDetailsTemplate(card, commentaries), `beforeend`);
+    render(body, popupComponent.getElement(), PositionElement.BEFOREEND);
 
-    const popup = body.querySelector(`.film-details`);
-    const closeBtn = popup.querySelector(`.film-details__close-btn`);
+    const closeBtn = popupComponent.getElement().querySelector(`.film-details__close-btn`);
 
     const closePopup = () => {
-      popup.remove();
+      popupComponent.getElement().remove();
       closeBtn.removeEventListener(`click`, onCloseBtnClick);
       document.removeEventListener(`keydown`, onCloseBtnKeydown);
     };
@@ -78,60 +76,57 @@ const callClickOnNewElem = (container, arr) => {
   watchClickElementsCard(commentsMovie, arr);
 };
 
-render(header, createRankTemplate(), `beforeend`);
+render(header, new RankComponent().getElement(), PositionElement.BEFOREEND);
 
 const cards = generateCards(Quantity.MOVIES);
 const navItems = fillMenuItems();
 
-render(main, createStatisticTamplate(navItems), `beforeend`);
-render(main, createSortTamplate(), `beforeend`);
-render(main, createContentTamplate(), `beforeend`);
+const contentComponent = new ContentComponent();
 
-const movies = main.querySelector(`.films`);
-const moveisList = movies.querySelector(`.films-list`);
-const moveisContainer = moveisList.querySelector(`.films-list__container`);
+render(main, new NavComponent(navItems).getElement(), PositionElement.BEFOREEND);
+render(main, new SortComponent().getElement(), PositionElement.BEFOREEND);
+render(main, contentComponent.getElement(), PositionElement.BEFOREEND);
+
+const moveisList = contentComponent.getElement().querySelector(`.films-list`);
+const moveisContainer = contentComponent.getElement().querySelector(`.films-list__container`);
 let showingCardsCount = Quantity.RENDER_MOVIES;
 
 
 cards.slice(0, showingCardsCount)
-  .forEach((card) => render(moveisContainer, createMovieTamplate(card), `beforeend`));
+  .forEach((card) => render(moveisContainer, new CardComponent(card).getElement(), PositionElement.BEFOREEND));
 
 callClickOnNewElem(moveisContainer, cards);
 
-// Отображает попап первого фильма
-const titleMovie = moveisContainer.querySelector(`.film-card__title`);
-titleMovie.click();
+const buttonMoreComponent = new ButtonMoreComponent();
 
-render(moveisList, createMoreMoviesButtonTamplate(), `beforeend`);
-render(movies, createTopListTemplate(), `beforeend`);
-render(movies, createMostCommentsListTemplate(), `beforeend`);
-render(footerStatistics, craeteAmountMoviesTemplate(), `beforeend`);
+render(moveisList, buttonMoreComponent.getElement(), PositionElement.BEFOREEND);
+render(contentComponent.getElement(), new ListTopComponent().getElement(), PositionElement.BEFOREEND);
+render(contentComponent.getElement(), new ListMostComponent().getElement(), PositionElement.BEFOREEND);
+render(footerStatistics, new AmountMoviesComponent().getElement(), PositionElement.BEFOREEND);
 
-const listsExtra = movies.querySelectorAll(`.films-list--extra`);
+const listsExtra = contentComponent.getElement().querySelectorAll(`.films-list--extra`);
 
 listsExtra.forEach((elem) => {
   const elemContainer = elem.querySelector(`.films-list__container`);
 
   for (let i = 0; i < Quantity.MOVIES_EXTRA; i++) {
-    render(elemContainer, createMovieTamplate(cards[i]), `beforeend`);
+    render(elemContainer, new CardComponent(cards[i]).getElement(), PositionElement.BEFOREEND);
   }
 
   callClickOnNewElem(elemContainer, cards);
 });
 
-const btnMore = moveisList.querySelector(`.films-list__show-more`);
-
-btnMore.addEventListener(`click`, () => {
+buttonMoreComponent.getElement().addEventListener(`click`, () => {
   const prevCardsCount = showingCardsCount;
   showingCardsCount = showingCardsCount + Quantity.RENDER_MOVIES_IF_CLICK_BUTTON;
 
   cards.slice(prevCardsCount, showingCardsCount)
-    .forEach((card) => render(moveisContainer, createMovieTamplate(card), `beforeend`));
+    .forEach((card) => render(moveisContainer, new CardComponent(card).getElement(), PositionElement.BEFOREEND));
 
   callClickOnNewElem(moveisContainer, cards);
 
   if (showingCardsCount >= cards.length) {
-    btnMore.remove();
+    buttonMoreComponent.getElement().remove();
   }
 });
 

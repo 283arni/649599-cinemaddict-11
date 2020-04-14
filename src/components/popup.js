@@ -1,4 +1,5 @@
 import {comments} from '../mock/comment';
+import {createElement} from '../utils';
 
 const CAPITAL_LITTER = 0;
 const FROM_SLICE_STRING = 1;
@@ -43,7 +44,7 @@ const createItemInfo = (informations) => {
   );
 };
 
-export const createPopupDetailsTemplate = (card) => {
+const createPopupDetailsTemplate = (card) => {
 
   const {title, poster, rating, description, countComments} = card;
   const discussion = comments.map((comment, i) => {
@@ -151,3 +152,26 @@ export const createPopupDetailsTemplate = (card) => {
     </section>`
   );
 };
+
+export default class Popup {
+  constructor(card) {
+    this._element = null;
+    this._card = card;
+  }
+
+  getTemplate() {
+    return createPopupDetailsTemplate(this._card);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

@@ -1,7 +1,8 @@
 const Amount = {
   DAYS: 30,
   MONTHS: 12,
-  YEARS: 99,
+  MIN_YEARS: 10,
+  MAX_YEARS: 99,
   RATING: 100,
   DIVISOR_RATING: 10,
   MAX_COMENTS: 6,
@@ -31,7 +32,11 @@ const randomCountComments = () => {
 };
 
 const generateDate = (namesMonths) => {
-  return `${Math.floor(Math.random() * Amount.DAYS)} ${namesMonths[Math.floor(Math.random() * Amount.MONTHS)]} 19${Math.floor(Math.random() * Amount.YEARS)}`;
+  return `${Math.floor(Math.random() * Amount.DAYS)} ${namesMonths[Math.floor(Math.random() * Amount.MONTHS)]} 19${getRandomYear(Amount.MIN_YEARS, Amount.MAX_YEARS)}`;
+};
+
+const getRandomYear = (min, max) => {
+  return Math.floor(Math.random() * (max - min) + min);
 };
 
 const randomValue = (arrayValues) => {

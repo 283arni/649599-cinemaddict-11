@@ -1,19 +1,33 @@
+import {createElement} from '../utils';
 
-const paramsSort = [`default`, `date`, `rating`];
-
-const createItemSortTemplate = (sorts) => {
-  return sorts.map((sort, i) => {
-    return (`<li><a href="#" class="sort__button ${i === 0 ? `sort__button--active` : ``}">Sort by ${sort}</a></li>`);
-  }).join(`\n`);
-};
-
-
-export const createSortTamplate = () => {
-  const sorting = createItemSortTemplate(paramsSort);
-
+const createSortTamplate = () => {
   return (
     `<ul class="sort">
-      ${sorting}
+      <li><a href="#" class="sort__button sort__button--active">Sort by default</a></li>
+      <li><a href="#" class="sort__button">Sort by date</a></li>
+      <li><a href="#" class="sort__button">Sort by rating</a></li>
     </ul>`
   );
 };
+
+export default class Sort {
+  constructor() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createSortTamplate();
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

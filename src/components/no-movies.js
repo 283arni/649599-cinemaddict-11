@@ -1,21 +1,16 @@
 import {createElement} from '../utils';
 
-const createMostCommentsListTemplate = () => {
-  return (
-    `<section class="films-list--extra">
-      <h2 class="films-list__title">Most commented</h2>
-
-    </section>`
-  );
+const createNoMoviesTemplate = () => {
+  return `<h2 class="films-list__title">There are no movies in our database</h2>`;
 };
 
-export default class ListMost {
+export default class NoMovies {
   constructor() {
     this._element = null;
   }
 
   getTemplate() {
-    return createMostCommentsListTemplate();
+    return createNoMoviesTemplate();
   }
 
   getElement() {

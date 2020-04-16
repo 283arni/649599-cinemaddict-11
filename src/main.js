@@ -2,12 +2,14 @@ import RankComponent from './components/rank';
 import NavComponent from './components/nav';
 import SortComponent from './components/sort';
 import ContentComponent from './components/content';
+import ContainerComponent from './components/container';
 import CardComponent from './components/card';
 import ButtonMoreComponent from './components/button-more';
-import ListTopComponent from './components/list-top';
+import ListTopComponent from './components/list-most';
 import ListMostComponent from './components/list-most';
 import PopupComponent from './components/popup';
 import AmountMoviesComponent from './components/amount-all-movies';
+import NoMoviesComponent from './components/no-movies';
 import {generateCards} from './mock/card';
 import {fillMenuItems} from './mock/nav';
 import {PositionElement, render} from './utils';
@@ -20,7 +22,6 @@ const Quantity = {
 };
 
 const ESC_KEY = `Escape`;
-
 
 const body = document.querySelector(`body`);
 const header = document.querySelector(`.header`);
@@ -80,53 +81,64 @@ render(header, new RankComponent().getElement(), PositionElement.BEFOREEND);
 
 const cards = generateCards(Quantity.MOVIES);
 const navItems = fillMenuItems();
-
 const contentComponent = new ContentComponent();
+const containerComponent = new ContainerComponent();
 
 render(main, new NavComponent(navItems).getElement(), PositionElement.BEFOREEND);
 render(main, new SortComponent().getElement(), PositionElement.BEFOREEND);
 render(main, contentComponent.getElement(), PositionElement.BEFOREEND);
 
 const moveisList = contentComponent.getElement().querySelector(`.films-list`);
-const moveisContainer = contentComponent.getElement().querySelector(`.films-list__container`);
-let showingCardsCount = Quantity.RENDER_MOVIES;
+
+if (cards.length) {
+  render(contentComponent.getElement().querySelector(`.films-list`), containerComponent.getElement(), PositionElement.BEFOREEND);
+
+  const moveisContainer = containerComponent.getElement();
+  let showingCardsCount = Quantity.RENDER_MOVIES;
 
 
-cards.slice(0, showingCardsCount)
-  .forEach((card) => render(moveisContainer, new CardComponent(card).getElement(), PositionElement.BEFOREEND));
-
-callClickOnNewElem(moveisContainer, cards);
-
-const buttonMoreComponent = new ButtonMoreComponent();
-
-render(moveisList, buttonMoreComponent.getElement(), PositionElement.BEFOREEND);
-render(contentComponent.getElement(), new ListTopComponent().getElement(), PositionElement.BEFOREEND);
-render(contentComponent.getElement(), new ListMostComponent().getElement(), PositionElement.BEFOREEND);
-render(footerStatistics, new AmountMoviesComponent().getElement(), PositionElement.BEFOREEND);
-
-const listsExtra = contentComponent.getElement().querySelectorAll(`.films-list--extra`);
-
-listsExtra.forEach((elem) => {
-  const elemContainer = elem.querySelector(`.films-list__container`);
-
-  for (let i = 0; i < Quantity.MOVIES_EXTRA; i++) {
-    render(elemContainer, new CardComponent(cards[i]).getElement(), PositionElement.BEFOREEND);
-  }
-
-  callClickOnNewElem(elemContainer, cards);
-});
-
-buttonMoreComponent.getElement().addEventListener(`click`, () => {
-  const prevCardsCount = showingCardsCount;
-  showingCardsCount = showingCardsCount + Quantity.RENDER_MOVIES_IF_CLICK_BUTTON;
-
-  cards.slice(prevCardsCount, showingCardsCount)
+  cards.slice(0, showingCardsCount)
     .forEach((card) => render(moveisContainer, new CardComponent(card).getElement(), PositionElement.BEFOREEND));
 
   callClickOnNewElem(moveisContainer, cards);
 
-  if (showingCardsCount >= cards.length) {
-    buttonMoreComponent.getElement().remove();
-  }
-});
+  const buttonMoreComponent = new ButtonMoreComponent();
 
+  render(moveisList, buttonMoreComponent.getElement(), PositionElement.BEFOREEND);
+  render(contentComponent.getElement(), new ListTopComponent().getElement(), PositionElement.BEFOREEND);
+  render(contentComponent.getElement(), new ListMostComponent().getElement(), PositionElement.BEFOREEND);
+  render(footerStatistics, new AmountMoviesComponent().getElement(), PositionElement.BEFOREEND);
+
+  const listsExtra = contentComponent.getElement().querySelectorAll(`.films-list--extra`);
+
+  listsExtra.forEach((elem) => {
+
+    const containerExtraComponent = new ContainerComponent();
+    render(elem, containerExtraComponent.getElement(), PositionElement.BEFOREEND);
+
+    for (let i = 0; i < Quantity.MOVIES_EXTRA; i++) {
+      render(containerExtraComponent.getElement(), new CardComponent(cards[i]).getElement(), PositionElement.BEFOREEND);
+    }
+
+    callClickOnNewElem(containerExtraComponent.getElement(), cards);
+  });
+
+  buttonMoreComponent.getElement().addEventListener(`click`, () => {
+    const prevCardsCount = showingCardsCount;
+    showingCardsCount = showingCardsCount + Quantity.RENDER_MOVIES_IF_CLICK_BUTTON;
+
+    cards.slice(prevCardsCount, showingCardsCount)
+      .forEach((card) => render(moveisContainer, new CardComponent(card).getElement(), PositionElement.BEFOREEND));
+
+    callClickOnNewElem(moveisContainer, cards);
+
+    if (showingCardsCount >= cards.length) {
+      buttonMoreComponent.getElement().remove();
+    }
+  });
+
+} else {
+  const titleMoveisList = contentComponent.getElement().querySelector(`.films-list__title`);
+
+  moveisList.replaceChild(new NoMoviesComponent().getElement(), titleMoveisList);
+}

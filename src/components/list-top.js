@@ -1,4 +1,4 @@
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
 
 const createMostCommentsListTemplate = () => {
   return (
@@ -9,24 +9,8 @@ const createMostCommentsListTemplate = () => {
   );
 };
 
-export default class ListTop {
-  constructor() {
-    this._element = null;
-  }
-
+export default class ListTop extends AbstractComponent {
   getTemplate() {
     return createMostCommentsListTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

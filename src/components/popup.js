@@ -1,8 +1,12 @@
-import {comments} from '../mock/comment';
-import {createElement} from '../utils';
+
+import {remove, PositionElement, render} from '../utils/render';
+import AbstractComponent from './abstract-component';
 
 const CAPITAL_LITTER = 0;
 const FROM_SLICE_STRING = 1;
+const ESC_KEY = `Escape`;
+
+const body = document.querySelector(`body`);
 
 const createCommentTemplate = (comment) => {
   const {name, emoji, author, text, date} = comment;
@@ -44,7 +48,7 @@ const createItemInfo = (informations) => {
   );
 };
 
-const createPopupDetailsTemplate = (card) => {
+const createPopupDetailsTemplate = (card, comments) => {
 
   const {title, poster, rating, description, countComments} = card;
   const discussion = comments.map((comment, i) => {
@@ -153,25 +157,47 @@ const createPopupDetailsTemplate = (card) => {
   );
 };
 
-export default class Popup {
+export default class Popup extends AbstractComponent {
   constructor(card) {
-    this._element = null;
+    super();
     this._card = card;
+    this._comments = null;
+
   }
 
   getTemplate() {
-    return createPopupDetailsTemplate(this._card);
+    return createPopupDetailsTemplate(this._card, this._comments);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
+  openPopup(card, comments) {
+    this._comments = comments;
+    this._card = card;
+
+    if (!body.querySelector(`.film-details`)) {
+      const popupComponent = this;
+
+      render(body, popupComponent, PositionElement.BEFOREEND);
+
+      const closeBtn = popupComponent.getElement().querySelector(`.film-details__close-btn`);
+
+      const closePopup = () => {
+        remove(popupComponent);
+        closeBtn.removeEventListener(`click`, onCloseBtnClick);
+        document.removeEventListener(`keydown`, onCloseBtnKeydown);
+      };
+
+      const onCloseBtnClick = () => {
+        closePopup();
+      };
+
+      const onCloseBtnKeydown = (e) => {
+        if (e.key === ESC_KEY) {
+          closePopup();
+        }
+      };
+
+      closeBtn.addEventListener(`click`, onCloseBtnClick);
+      document.addEventListener(`keydown`, onCloseBtnKeydown);
     }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

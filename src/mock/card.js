@@ -32,11 +32,11 @@ const randomCountComments = () => {
 };
 
 const generateDate = (namesMonths) => {
-  return `${Math.floor(Math.random() * Amount.DAYS)} ${namesMonths[Math.floor(Math.random() * Amount.MONTHS)]} 19${getRandomYear(Amount.MIN_YEARS, Amount.MAX_YEARS)}`;
+  return `${Math.floor(Math.random() * Amount.DAYS)} ${namesMonths[Math.floor(Math.random() * Amount.MONTHS)]}`;
 };
 
 const getRandomYear = (min, max) => {
-  return Math.floor(Math.random() * (max - min) + min);
+  return `19${Math.floor(Math.random() * (max - min) + min)}`;
 };
 
 const randomValue = (arrayValues) => {
@@ -73,6 +73,7 @@ const generateCard = () => {
     'actors': `Erich von Stroheim, Mary Beth Hughes, Dan Duryea`,
     'rating': getRating(),
     'release date': generateDate(months),
+    'year': getRandomYear(Amount.MIN_YEARS, Amount.MAX_YEARS),
     'time': getTimeMovie(Amount.HOURS, Amount.MINUTES),
     'country': `USA`,
     'description': sliceDescription(description),

@@ -2,9 +2,7 @@ import AbstractComponent from './abstract-component';
 import PopupComponent from './popup';
 
 const createMovieTamplate = (card) => {
-  const {title, poster, genre, rating, time, description, countComments, 'release date': releaseDate} = card;
-
-  const year = releaseDate.substring(releaseDate.length - 4);
+  const {title, poster, genre, rating, time, description, countComments, year} = card;
 
   return (
     `<article class="film-card">
@@ -30,6 +28,7 @@ const createMovieTamplate = (card) => {
 export default class Card extends AbstractComponent {
   constructor(card) {
     super();
+
     this._card = card;
     this._popupComponent = new PopupComponent();
   }

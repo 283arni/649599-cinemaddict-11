@@ -1,7 +1,7 @@
 import RankComponent from './components/rank';
 import NavComponent from './components/nav';
 import PageController from './controllers/page-controller';
-import SortComponent from './components/sort';
+
 import ContentComponent from './components/content';
 import AmountMoviesComponent from './components/amount-all-movies';
 import {generateCards} from './mock/card';
@@ -20,7 +20,6 @@ const cards = generateCards(QUANTITY_MOVIES);
 
 render(header, new RankComponent(), PositionElement.BEFOREEND);
 render(main, new NavComponent(navItems), PositionElement.BEFOREEND);
-render(main, new SortComponent(), PositionElement.BEFOREEND);
 render(footerStatistics, new AmountMoviesComponent(), PositionElement.BEFOREEND);
 
 

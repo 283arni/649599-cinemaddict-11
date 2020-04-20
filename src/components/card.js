@@ -1,4 +1,5 @@
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
+import PopupComponent from './popup';
 
 const createMovieTamplate = (card) => {
   const {title, poster, genre, rating, time, description, countComments, 'release date': releaseDate} = card;
@@ -26,25 +27,32 @@ const createMovieTamplate = (card) => {
   );
 };
 
-export default class Card {
+export default class Card extends AbstractComponent {
   constructor(card) {
-    this._element = null;
+    super();
     this._card = card;
+    this._popupComponent = new PopupComponent();
   }
 
   getTemplate() {
     return createMovieTamplate(this._card);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
+  setClickElementCard(element, cards, comments) {
+    const titleMovies = element.getElement().querySelectorAll(`.film-card__title`);
+    const posterMovies = element.getElement().querySelectorAll(`.film-card__poster`);
+    const commentMovies = element.getElement().querySelectorAll(`.film-card__comments`);
 
-    return this._element;
+    this.getOpenPopup(titleMovies, cards, comments);
+    this.getOpenPopup(posterMovies, cards, comments);
+    this.getOpenPopup(commentMovies, cards, comments);
   }
 
-  removeElement() {
-    this._element = null;
+  getOpenPopup(list, info, comments) {
+    list.forEach((elem, i) => {
+      elem.addEventListener(`click`, () => {
+        this._popupComponent.openPopup(info[i], comments);
+      });
+    });
   }
 }

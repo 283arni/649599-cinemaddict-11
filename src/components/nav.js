@@ -1,4 +1,4 @@
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
 
 const START_ACTIVE_ELEMENT = 0;
 
@@ -26,25 +26,13 @@ const createStatisticTamplate = (array) => {
   );
 };
 
-export default class Navigation {
+export default class Navigation extends AbstractComponent {
   constructor(navItem) {
-    this._element = null;
+    super();
     this._nav = navItem;
   }
 
   getTemplate() {
     return createStatisticTamplate(this._nav);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

@@ -1,8 +1,13 @@
 import AbstractComponent from './abstract-component';
-import PopupComponent from './popup';
+import MovieController from '../controllers/movie-controller';
+
 
 const createMovieTamplate = (card) => {
-  const {title, poster, genre, rating, time, description, countComments, year} = card;
+  const {title, poster, genre, rating, time, description, countComments, year, activedWatchlist, activedWatched, activedFavorite} = card;
+
+  const choosedWatchlist = activedWatchlist ? `film-card__controls-item--active` : ``;
+  const choosedWatched = activedWatched ? `film-card__controls-item--active` : ``;
+  const choosedFavorite = activedFavorite ? `film-card__controls-item--active` : ``;
 
   return (
     `<article class="film-card">
@@ -17,9 +22,9 @@ const createMovieTamplate = (card) => {
       <p class="film-card__description">${description}</p>
       <a class="film-card__comments">${countComments} comments</a>
       <form class="film-card__controls">
-        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
-        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">Mark as watched</button>
-        <button class="film-card__controls-item button film-card__controls-item--favorite">Mark as favorite</button>
+        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${choosedWatchlist}">Add to watchlist</button>
+        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${choosedWatched}">Mark as watched</button>
+        <button class="film-card__controls-item button film-card__controls-item--favorite ${choosedFavorite}">Mark as favorite</button>
       </form>
     </article>`
   );
@@ -30,28 +35,40 @@ export default class Card extends AbstractComponent {
     super();
 
     this._card = card;
-    this._popupComponent = new PopupComponent();
+    this._movieController = new MovieController();
+    this._submitHandler = null;
   }
 
   getTemplate() {
     return createMovieTamplate(this._card);
   }
 
-  setClickElementCard(element, cards, comments) {
-    const titleMovies = element.getElement().querySelectorAll(`.film-card__title`);
-    const posterMovies = element.getElement().querySelectorAll(`.film-card__poster`);
-    const commentMovies = element.getElement().querySelectorAll(`.film-card__comments`);
+  setClickElementCard(popup) {
+    this.getElement().addEventListener(`click`, (e) => {
+      const titleMovies = this.getElement().querySelector(`.film-card__title`);
+      const posterMovies = this.getElement().querySelector(`.film-card__poster`);
+      const commentMovies = this.getElement().querySelector(`.film-card__comments`);
 
-    this.getOpenPopup(titleMovies, cards, comments);
-    this.getOpenPopup(posterMovies, cards, comments);
-    this.getOpenPopup(commentMovies, cards, comments);
-  }
-
-  getOpenPopup(list, info, comments) {
-    list.forEach((elem, i) => {
-      elem.addEventListener(`click`, () => {
-        this._popupComponent.openPopup(info[i], comments);
-      });
+      if (e.target === titleMovies || e.target === posterMovies || e.target === commentMovies) {
+        this._movieController.openPopup(popup);
+      }
     });
   }
+
+
+  setWatchlistClickHandler(handler) {
+    this.getElement().querySelector(`.film-card__controls-item--add-to-watchlist`)
+      .addEventListener(`click`, handler);
+  }
+
+  setWatchedClickHandler(handler) {
+    this.getElement().querySelector(`.film-card__controls-item--mark-as-watched`)
+    .addEventListener(`click`, handler);
+  }
+
+  setFavoriteClickHandler(handler) {
+    this.getElement().querySelector(`.film-card__controls-item--favorite`)
+    .addEventListener(`click`, handler);
+  }
+
 }

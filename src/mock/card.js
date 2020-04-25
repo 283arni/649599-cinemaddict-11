@@ -79,6 +79,9 @@ const generateCard = () => {
     'description': sliceDescription(description),
     'countComments': randomCountComments(),
     'genre': randomValue(genres),
+    'activedWatchlist': false,
+    'activedWatched': false,
+    'activedFavorite': false
   };
 };
 

@@ -43,14 +43,14 @@ export default class Card extends AbstractComponent {
     return createMovieTamplate(this._card);
   }
 
-  setClickElementCard(popup) {
+  setClickElementCard(popup, onViewChange) {
     this.getElement().addEventListener(`click`, (e) => {
       const titleMovies = this.getElement().querySelector(`.film-card__title`);
       const posterMovies = this.getElement().querySelector(`.film-card__poster`);
       const commentMovies = this.getElement().querySelector(`.film-card__comments`);
 
       if (e.target === titleMovies || e.target === posterMovies || e.target === commentMovies) {
-        this._movieController.openPopup(popup);
+        this._movieController.openPopup(popup, onViewChange);
       }
     });
   }

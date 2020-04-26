@@ -81,7 +81,8 @@ const generateCard = () => {
     'genre': randomValue(genres),
     'activedWatchlist': false,
     'activedWatched': false,
-    'activedFavorite': false
+    'activedFavorite': false,
+    'emoji': ``
   };
 };
 

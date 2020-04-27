@@ -74,7 +74,7 @@ const generateCard = () => {
     'rating': getRating(),
     'release date': moment(generateDate()).format(`DD MMMM`),
     'year': moment([getRandomYear(Amount.MIN_YEARS, Amount.MAX_YEARS)]).format(`YYYY`),
-    'time': `${moment(Date.now()).format(`hh`)}h ${moment(Date.now()).format(`mm`)}m`,
+    'time': moment(Date.now()).format(`HH[h] mm[m]`),
     'country': `USA`,
     'description': sliceDescription(description),
     'countComments': randomCountComments(),

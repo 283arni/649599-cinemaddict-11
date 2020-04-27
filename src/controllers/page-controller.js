@@ -2,7 +2,7 @@ import ButtonMoreComponent from '../components/button-more';
 import ListTopComponent from '../components/list-top';
 import ListMostComponent from '../components/list-most';
 import ContainerComponent from '../components/container';
-import CardComponent from '../components/card';
+import MovieController from '../controllers/movie-controller';
 import SortComponent, {SortType} from '../components/sort';
 import NoMoviesComponent from '../components/no-movies';
 import {remove, replaceTitle, PositionElement, render} from '../utils/render';
@@ -16,32 +16,34 @@ const Quantity = {
 
 const main = document.querySelector(`.main`);
 
-const renderCardsInContainer = (component, times, movies, reviews, start = Quantity.START_SLICE_MOVIES, clear = false) => {
+const renderCardsInContainer = (component, times, movies, onDataChange, onViewChange, start = Quantity.START_SLICE_MOVIES, clear = false) => {
   let container = null;
-  let elem = null;
-
+  let elementContainer = null;
   // Проверка рендерит с нулегого объекта массива фильмов и не сортировка
   if (!start && !clear) {
     container = new ContainerComponent();
-    elem = container.getElement();
+    elementContainer = container.getElement();
     render(component, container, PositionElement.BEFOREEND);
   } else {
     container = component;
-    elem = component.getElement().querySelector(`.films-list__container`);
+    elementContainer = component.getElement().querySelector(`.films-list__container`);
 
     // При сортировки очистить контейнер
     if (clear) {
-      elem.innerHTML = ``;
+      elementContainer.innerHTML = ``;
     }
   }
 
   let showingCardsCount = times;
-  const cardComponent = new CardComponent();
 
-  movies.slice(start, showingCardsCount)
-    .forEach((movie) => render(elem, new CardComponent(movie), PositionElement.BEFOREEND));
+  const moviesSliced = movies.slice(start, showingCardsCount);
 
-  cardComponent.setClickElementCard(container, movies, reviews);
+  return moviesSliced.map((movie) => {
+    const movieController = new MovieController(elementContainer, onDataChange, onViewChange);
+    movieController.render(movie);
+
+    return movieController;
+  });
 };
 
 const getSortedCards = (tasks, sortType) => {
@@ -50,10 +52,10 @@ const getSortedCards = (tasks, sortType) => {
 
   switch (sortType) {
     case SortType.RATING:
-      sortedCards = showingTasks.sort((a, b) => a.rating - b.rating);
+      sortedCards = showingTasks.sort((a, b) => b.rating - a.rating);
       break;
     case SortType.DATE:
-      sortedCards = showingTasks.sort((a, b) => a.year - b.year);
+      sortedCards = showingTasks.sort((a, b) => b.year - a.year);
       break;
     case SortType.DEFAULT:
       sortedCards = showingTasks;
@@ -65,66 +67,98 @@ const getSortedCards = (tasks, sortType) => {
 
 
 export default class PageController {
-  constructor(content) {
-    this._content = content;
+  constructor(container) {
+    this._container = container;
+
+    this._cards = [];
+    this._showedMoviesController = [];
+    this._showedMoviesExtraController = [];
+    this.showingCardsCount = Quantity.RENDER_MOVIES;
 
     this._buttonMoreComponent = new ButtonMoreComponent();
     this._listTopComponent = new ListTopComponent();
     this._listMostComponent = new ListMostComponent();
     this._noMoviesComponent = new NoMoviesComponent();
     this._sortComponent = new SortComponent();
+
+    this._onDataChange = this._onDataChange.bind(this);
+    this._onViewChange = this._onViewChange.bind(this);
   }
 
-  render(cards, comments) {
+  render(cards) {
+
+    this._cards = cards;
+
+
     render(main, this._sortComponent, PositionElement.BEFOREEND);
-    render(main, this._content, PositionElement.BEFOREEND);
+    render(main, this._container, PositionElement.BEFOREEND);
 
-    let showingCardsCount = Quantity.RENDER_MOVIES;
+    const moveisList = this._container.getElement().querySelector(`.films-list`);
 
-    const renderButtonMore = () => {
-      render(moveisList, this._buttonMoreComponent, PositionElement.BEFOREEND);
-
-      this._buttonMoreComponent.setClickHandler(() => {
-        const prevCardsCount = showingCardsCount;
-        showingCardsCount = showingCardsCount + Quantity.RENDER_MOVIES_IF_CLICK_BUTTON;
-
-        const sortedCards = getSortedCards(cards, this._sortComponent.getSortType());
-
-        renderCardsInContainer(this._content, showingCardsCount, sortedCards, comments, prevCardsCount);
-
-        if (showingCardsCount >= cards.length) {
-          remove(this._buttonMoreComponent);
-        }
-      });
-    };
-
-    const moveisList = this._content.getElement().querySelector(`.films-list`);
-
-    if (!cards.length) {
+    if (!this._cards.length) {
       replaceTitle(this._noMoviesComponent, this._content);
       return;
     }
 
-    renderCardsInContainer(moveisList, Quantity.RENDER_MOVIES, cards, comments);
-    renderButtonMore();
+    let newCards = renderCardsInContainer(moveisList, Quantity.RENDER_MOVIES, this._cards, this._onDataChange, this._onViewChange);
+    this._showedMoviesController = this._showedMoviesController.concat(newCards);
+
+    this._renderButtonMore();
 
 
-    render(this._content.getElement(), this._listTopComponent, PositionElement.BEFOREEND);
-    render(this._content.getElement(), this._listMostComponent, PositionElement.BEFOREEND);
+    render(this._container.getElement(), this._listTopComponent, PositionElement.BEFOREEND);
+    render(this._container.getElement(), this._listMostComponent, PositionElement.BEFOREEND);
 
-    const listsExtra = this._content.getElement().querySelectorAll(`.films-list--extra`);
+    const listsExtra = this._container.getElement().querySelectorAll(`.films-list--extra`);
 
     listsExtra.forEach((elem) => {
-      renderCardsInContainer(elem, Quantity.MOVIES_EXTRA, cards, comments);
+      const newCardsExtra = renderCardsInContainer(elem, Quantity.MOVIES_EXTRA, this._cards, this._onDataChange, this._onViewChange);
+      this._showedMoviesExtraController = this._showedMoviesExtraController.concat(newCardsExtra);
     });
 
 
     this._sortComponent.setSortTypeChangeHandler((sortType) => {
 
+      const sortedCards = getSortedCards(this._cards, sortType, 0, this.showingCardsCount);
 
-      const sortedCards = getSortedCards(cards, sortType, 0, showingCardsCount);
-
-      renderCardsInContainer(this._content, showingCardsCount, sortedCards, comments, 0, true);
+      newCards = renderCardsInContainer(this._container, this.showingCardsCount, sortedCards, this._onDataChange, this._onViewChange, 0, true);
+      this._showedMoviesController = newCards;
     });
+  }
+
+  _renderButtonMore() {
+    const moveisList = this._container.getElement().querySelector(`.films-list`);
+
+    render(moveisList, this._buttonMoreComponent, PositionElement.BEFOREEND);
+
+    this._buttonMoreComponent.setClickHandler(() => {
+      const prevCardsCount = this.showingCardsCount;
+      this.showingCardsCount = this.showingCardsCount + Quantity.RENDER_MOVIES_IF_CLICK_BUTTON;
+
+      const sortedCards = getSortedCards(this._cards, this._sortComponent.getSortType());
+
+      const newCards = renderCardsInContainer(this._container, this.showingCardsCount, sortedCards, this._onDataChange, this._onViewChange, prevCardsCount);
+      this._showedMoviesController = this._showedMoviesController.concat(newCards);
+
+      if (this.showingCardsCount >= this._cards.length) {
+        remove(this._buttonMoreComponent);
+      }
+    });
+  }
+
+  _onDataChange(movieController, oldData, newData) {
+    const index = this._cards.findIndex((it) => it === oldData);
+    if (index === -1) {
+      return;
+    }
+
+    this._cards = [].concat(this._cards.slice(0, index), newData, this._cards.slice(index + 1));
+
+    movieController.render(this._cards[index]);
+  }
+
+  _onViewChange() {
+    this._showedMoviesController.forEach((item) => item.setDefaultView());
+    this._showedMoviesExtraController.forEach((item) => item.setDefaultView());
   }
 }

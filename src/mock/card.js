@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 const Amount = {
   DAYS: 30,
   MONTHS: 12,
@@ -12,8 +14,6 @@ const Amount = {
 };
 
 const genres = [`comedy`, `mystery`, `drama`, `cartoon`, `western`, `musical`];
-
-const months = [`January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`, `December`];
 
 const sourcePosterMovies = {
   'Made for each other': `./images/posters/made-for-each-other.png`,
@@ -31,8 +31,8 @@ const randomCountComments = () => {
   return Math.floor(Math.random() * Amount.MAX_COMENTS);
 };
 
-const generateDate = (namesMonths) => {
-  return `${Math.floor(Math.random() * Amount.DAYS)} ${namesMonths[Math.floor(Math.random() * Amount.MONTHS)]}`;
+const generateDate = () => {
+  return Date.now() * Math.random() * Amount.MONTHS;
 };
 
 const getRandomYear = (min, max) => {
@@ -43,9 +43,9 @@ const randomValue = (arrayValues) => {
   return arrayValues[Math.floor(Math.random() * arrayValues.length)];
 };
 
-const getTimeMovie = (hour, minute) => {
-  return `${Math.floor(Math.random() * hour)}h ${Math.floor(Math.random() * minute)}m`;
-};
+// const getTimeMovie = (hour, minute) => {
+//   return `${Math.floor(Math.random() * hour)} ${Math.floor(Math.random() * minute)}`;
+// };
 
 const getRating = () => {
   return Math.floor(Math.random() * Amount.RATING) / Amount.DIVISOR_RATING;
@@ -72,9 +72,9 @@ const generateCard = () => {
     'writers': `Anne Wigton, Heinz Herald, Richard Weil`,
     'actors': `Erich von Stroheim, Mary Beth Hughes, Dan Duryea`,
     'rating': getRating(),
-    'release date': generateDate(months),
-    'year': getRandomYear(Amount.MIN_YEARS, Amount.MAX_YEARS),
-    'time': getTimeMovie(Amount.HOURS, Amount.MINUTES),
+    'release date': moment(generateDate()).format(`DD MMMM`),
+    'year': moment([getRandomYear(Amount.MIN_YEARS, Amount.MAX_YEARS)]).format(`YYYY`),
+    'time': moment(Date.now()).format(`HH[h] mm[m]`),
     'country': `USA`,
     'description': sliceDescription(description),
     'countComments': randomCountComments(),

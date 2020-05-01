@@ -1,20 +1,30 @@
 import AbstractComponent from './abstract-component';
 
-const START_ACTIVE_ELEMENT = 0;
+const setActiveClass = function (evt, element) {
+  const filtersList = element.querySelectorAll(`.main-navigation__item`);
 
-const creatNavItemTemplate = (tab, check) => {
-  const {id, text, count} = tab;
+  filtersList.forEach((filter) => {
+    filter.classList.remove(`main-navigation__item--active`);
+  });
 
-  const activeClass = check ? `main-navigation__item--active` : ``;
-  const insertCount = !check ? `<span class="main-navigation__item-count">${count}</span>` : ``;
+  evt.target.classList.add(`main-navigation__item--active`);
+};
+
+const creatNavItemTemplate = (tab) => {
+
+  const {name, count} = tab;
+  const updateName = name.split(` `)[0];
+
+  const activeClass = updateName === `All` ? `main-navigation__item--active` : ``;
+  const insertCount = updateName !== `All` ? `<span class="main-navigation__item-count">${count}</span>` : ``;
 
   return (
-    `<a href="#${id}" class="main-navigation__item ${activeClass}">${text} ${insertCount}</a>`
+    `<a href="#${updateName}" data-name="${updateName}" class="main-navigation__item  ${activeClass}">${name} ${insertCount}</a>`
   );
 };
 
 const createStatisticTamplate = (array) => {
-  const menuItems = array.map((item, i) => creatNavItemTemplate(item, i === START_ACTIVE_ELEMENT)).join(`\n`);
+  const menuItems = array.map((item) => creatNavItemTemplate(item)).join(`\n`);
 
   return (
     `<nav class="main-navigation">
@@ -29,10 +39,20 @@ const createStatisticTamplate = (array) => {
 export default class Navigation extends AbstractComponent {
   constructor(navItem) {
     super();
+
     this._nav = navItem;
   }
 
   getTemplate() {
     return createStatisticTamplate(this._nav);
+  }
+
+  setFilterChangeHandler(handler) {
+    this.getElement().addEventListener(`click`, (evt) => {
+      const filterName = evt.target.dataset.name;
+
+      setActiveClass(evt, this.getElement());
+      handler(filterName);
+    });
   }
 }

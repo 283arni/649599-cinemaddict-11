@@ -1,13 +1,11 @@
 import RankComponent from './components/rank';
-import NavComponent from './components/nav';
+import FilterController from './controllers/filter-controller';
 import PageController from './controllers/page-controller';
-
+import MoviesModel from './models/movies';
 import ContentComponent from './components/content';
 import AmountMoviesComponent from './components/amount-all-movies';
 import {generateCards} from './mock/card';
-import {fillMenuItems} from './mock/nav';
 import {PositionElement, render} from './utils/render';
-import {comments} from './mock/comment';
 
 
 const QUANTITY_MOVIES = 22;
@@ -15,17 +13,19 @@ const QUANTITY_MOVIES = 22;
 const header = document.querySelector(`.header`);
 const main = document.querySelector(`.main`);
 const footerStatistics = document.querySelector(`.footer__statistics`);
-const navItems = fillMenuItems();
 const cards = generateCards(QUANTITY_MOVIES);
+const moviesModel = new MoviesModel();
+moviesModel.setMovies(cards);
 
 render(header, new RankComponent(), PositionElement.BEFOREEND);
-render(main, new NavComponent(navItems), PositionElement.BEFOREEND);
 render(footerStatistics, new AmountMoviesComponent(), PositionElement.BEFOREEND);
 
+const filterController = new FilterController(main, moviesModel);
+filterController.render();
 
 const contentComponent = new ContentComponent();
-const contentController = new PageController(contentComponent);
+const contentController = new PageController(contentComponent, moviesModel);
 
-contentController.render(cards, comments);
+contentController.render(cards);
 
 

@@ -37,7 +37,7 @@ const renderCardsInContainer = (component, movies, onDataChange, onViewChange, i
   });
 };
 
-const getSortedCards = (tasks, sortType) => {
+const getSortedCards = (tasks, sortType, from, to) => {
   let sortedCards = [];
   const showingTasks = tasks.slice();
 
@@ -53,7 +53,7 @@ const getSortedCards = (tasks, sortType) => {
       break;
   }
 
-  return sortedCards;
+  return sortedCards.slice(from, to);
 };
 
 
@@ -98,7 +98,7 @@ export default class PageController {
       return;
     }
 
-    let newCards = renderCardsInContainer(moveisList, movies.slice(0, Quantity.RENDER_MOVIES), this._onDataChange, this._onViewChange);
+    const newCards = renderCardsInContainer(moveisList, movies.slice(0, Quantity.RENDER_MOVIES), this._onDataChange, this._onViewChange);
     this._showedMoviesControllers = this._showedMoviesControllers.concat(newCards);
 
     this._renderButtonMore();
@@ -116,7 +116,6 @@ export default class PageController {
   }
 
   _sortMoviesRender(sortType) {
-
     const sortedCards = getSortedCards(this._moviesModel.getMovies(), sortType, 0, this.showingCardsCount);
 
     this._removeMovies();

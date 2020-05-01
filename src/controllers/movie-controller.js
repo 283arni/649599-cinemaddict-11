@@ -1,6 +1,7 @@
 import {remove, replace, PositionElement, render} from '../utils/render';
 import CardComponent from '../components/card';
 import PopupComponent from '../components/popup';
+import {comments} from '../mock/comment';
 
 const body = document.querySelector(`body`);
 
@@ -20,7 +21,7 @@ export default class MovieController {
     const oldCardComponent = this._cardComponent;
 
     this._cardComponent = new CardComponent(card);
-    this._popupComponent = new PopupComponent(card);
+    this._popupComponent = new PopupComponent(card, comments);
 
     this._cardComponent.setClickElementCard(this._popupComponent, this._onViewChange);
 

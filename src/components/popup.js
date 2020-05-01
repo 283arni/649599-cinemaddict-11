@@ -1,4 +1,4 @@
-import {comments} from '../mock/comment';
+// import {comments} from '../mock/comment';
 // import {remove, PositionElement, render} from '../utils/render';
 import AbstractSmartComponent from "./abstract-smart-component.js";
 
@@ -46,10 +46,10 @@ const createItemInfo = (informations) => {
   );
 };
 
-const createPopupDetailsTemplate = (card, options = {}) => {
+const createPopupDetailsTemplate = (card, reviews, options = {}) => {
 
   const {title, poster, rating, description, countComments} = card;
-  const discussion = comments.map((comment, i) => {
+  const discussion = reviews.map((comment, i) => {
     return i < countComments ? createCommentTemplate(comment) : null;
   }).join(`\n`);
 
@@ -167,9 +167,10 @@ const createPopupDetailsTemplate = (card, options = {}) => {
 };
 
 export default class Popup extends AbstractSmartComponent {
-  constructor(card) {
+  constructor(card, comments) {
     super();
 
+    this._comments = comments;
     this._card = card;
     this._closeHandler = null;
     this.watchedHandler = null;
@@ -177,7 +178,7 @@ export default class Popup extends AbstractSmartComponent {
   }
 
   getTemplate() {
-    return createPopupDetailsTemplate(this._card, {
+    return createPopupDetailsTemplate(this._card, this._comments, {
       activedWatchlist: this.activedWatchlist,
       activedWatched: this.activedWatched,
       activedFavorite: this.activedFavorite,

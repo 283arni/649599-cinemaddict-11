@@ -176,5 +176,6 @@ export default class PageController {
 
   _onFilterChange() {
     this._updateMovies(Quantity.RENDER_MOVIES);
+    this._sortComponent.setActiveSort(SortType.DEFAULT);
   }
 }

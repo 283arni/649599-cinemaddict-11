@@ -66,6 +66,7 @@ const generateCard = () => {
   const [title, poster] = randomValue(posters);
 
   return {
+    'id': String(new Date() + Math.random()),
     'title': title,
     'poster': poster,
     'director': `Anthony Mann`,

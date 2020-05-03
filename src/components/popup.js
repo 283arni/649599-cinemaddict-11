@@ -1,21 +1,31 @@
-import {comments} from '../mock/comment';
-// import {remove, PositionElement, render} from '../utils/render';
+
 import AbstractSmartComponent from "./abstract-smart-component.js";
+import {encode} from "he";
+import moment from 'moment';
 
 const CAPITAL_LITTER = 0;
 const FROM_SLICE_STRING = 1;
+const KEY_ENTER = `Enter`;
+const KEY_CONTROL = `Control`;
 
+const newComment = {
+  name: `sleeping`,
+  emoji: `./images/emoji/sleeping.png`,
+  author: `Tim Macoveev`,
+  text: `Booooooooooring`,
+  date: moment(`20100214`).format(`YYYY/MM/DD hh:mm`)
+};
 
 const createCommentTemplate = (comment) => {
   const {name, emoji, author, text, date} = comment;
-
+  const filtredText = encode(text);
   return (
     `<li class="film-details__comment">
     <span class="film-details__comment-emoji">
       <img src="${emoji}" width="55" height="55" alt="emoji-${name}">
     </span>
     <div>
-      <p class="film-details__comment-text">${text}</p>
+      <p class="film-details__comment-text">${filtredText}</p>
       <p class="film-details__comment-info">
         <span class="film-details__comment-author">${author}</span>
         <span class="film-details__comment-day">${date}</span>
@@ -46,14 +56,15 @@ const createItemInfo = (informations) => {
   );
 };
 
-const createPopupDetailsTemplate = (card, options = {}) => {
+const createPopupDetailsTemplate = (card, reviews, options = {}) => {
 
   const {title, poster, rating, description, countComments} = card;
-  const discussion = comments.map((comment, i) => {
-    return i < countComments ? createCommentTemplate(comment) : null;
+  const discussion = reviews.map((comment) => {
+    return createCommentTemplate(comment);
   }).join(`\n`);
 
   const cloneCard = Object.assign({}, card);
+  delete cloneCard.id;
   delete cloneCard.title;
   delete cloneCard.poster;
   delete cloneCard.rating;
@@ -167,17 +178,20 @@ const createPopupDetailsTemplate = (card, options = {}) => {
 };
 
 export default class Popup extends AbstractSmartComponent {
-  constructor(card) {
+  constructor(card, comments) {
     super();
 
+    this._comments = comments;
+    this._newComment = null;
     this._card = card;
     this._closeHandler = null;
     this.watchedHandler = null;
 
+    this._copyComments = this._comments.slice();
   }
 
   getTemplate() {
-    return createPopupDetailsTemplate(this._card, {
+    return createPopupDetailsTemplate(this._card, this._copyComments, {
       activedWatchlist: this.activedWatchlist,
       activedWatched: this.activedWatched,
       activedFavorite: this.activedFavorite,
@@ -199,8 +213,8 @@ export default class Popup extends AbstractSmartComponent {
 
     element.querySelector(`.film-details__control-label--watchlist`)
       .addEventListener(`click`, () => {
-
         this.activedWatchlist = !this.activedWatchlist;
+
         this.rerender();
       });
 
@@ -221,6 +235,7 @@ export default class Popup extends AbstractSmartComponent {
     const emojies = element.querySelectorAll(`.film-details__emoji-label`);
     const emojiDiv = element.querySelector(`.film-details__add-emoji-label`);
 
+
     emojies.forEach((emoji) => {
       emoji.addEventListener(`click`, () => {
         this.emoji = emoji.firstElementChild;
@@ -229,7 +244,32 @@ export default class Popup extends AbstractSmartComponent {
           emojiDiv.firstElementChild.remove();
         }
 
-        emojiDiv.append(this.emoji.cloneNode());
+        emojiDiv.append(emoji.firstElementChild.cloneNode());
+
+        newComment.emoji = emoji.firstElementChild.src;
+        newComment.name = emoji.previousElementSibling.value;
+
+      });
+    });
+    // добавление нового коммента при нажатии Ctrl + Enter
+    this.runOnKeys(element.querySelector(`textarea`), () => {
+      this.emoji = null;
+
+      this._copyComments.push(Object.assign({}, newComment));
+
+      this.rerender();
+    }, KEY_CONTROL, KEY_ENTER);
+
+    element.querySelector(`textarea`).addEventListener(`input`, (evt) => {
+      newComment.text = evt.target.value;
+    });
+
+    const deleteBtns = element.querySelectorAll(`.film-details__comment-delete`);
+
+    deleteBtns.forEach((button, i) => {
+      button.addEventListener(`click`, (e) => {
+        e.preventDefault();
+        this._copyComments = this._copyComments.filter((review, j) => i !== j);
 
         this.rerender();
       });
@@ -241,5 +281,27 @@ export default class Popup extends AbstractSmartComponent {
       .addEventListener(`click`, handler);
 
     this._closeHandler = handler;
+  }
+
+  runOnKeys(elem, func, ...codes) {
+    let pressed = new Set();
+
+    elem.addEventListener(`keydown`, (event) => {
+      pressed.add(event.key);
+
+      for (let code of codes) {
+        if (!pressed.has(code)) {
+          return;
+        }
+      }
+
+      pressed.clear();
+
+      func();
+    });
+
+    elem.addEventListener(`keyup`, (event) => {
+      pressed.delete(event.key);
+    });
   }
 }

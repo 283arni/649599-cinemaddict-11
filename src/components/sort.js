@@ -45,17 +45,19 @@ export default class Sort extends AbstractComponent {
       }
 
       removeClassSort(this.getElement());
-      evt.target.classList.add(`sort__button--active`);
 
       const sortType = evt.target.dataset.sort;
 
-      if (this._currenSortType === sortType) {
-        return;
-      }
-
+      evt.target.classList.add(`sort__button--active`);
       this._currenSortType = sortType;
 
       handler(this._currenSortType);
     });
+  }
+
+  setActiveSort(type) {
+    removeClassSort(this.getElement());
+    const defaultButton = this.getElement().querySelector(`[data-sort="${type}"]`);
+    defaultButton.classList.add(`sort__button--active`);
   }
 }

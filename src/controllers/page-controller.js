@@ -126,12 +126,14 @@ export default class PageController {
     const moveisList = this._container.getElement().querySelector(`.films-list`);
 
     render(moveisList, this._buttonMoreComponent, PositionElement.BEFOREEND);
+
     this._buttonMoreComponent.setClickHandler(this._buttonMoreComponentClick);
   }
 
   _buttonMoreComponentClick() {
     const movies = this._moviesModel.getMovies();
     const prevCardsCount = this.showingCardsCount;
+
     this.showingCardsCount = this.showingCardsCount + Quantity.RENDER_MOVIES_IF_CLICK_BUTTON;
 
     const sortedCards = getSortedCards(movies, this._sortComponent.getSortType());
@@ -145,8 +147,17 @@ export default class PageController {
   }
 
   _updateMovies(count) {
+    const movies = this._moviesModel.getMovies();
+
     this._removeMovies();
-    this._renderMovies(this._moviesModel.getMovies().slice(0, count));
+    this._renderMovies(movies.slice(0, count));
+    this.showingCardsCount = Quantity.RENDER_MOVIES;
+
+    if (movies.length <= this.showingCardsCount) {
+      remove(this._buttonMoreComponent);
+    } else {
+      this._renderButtonMore();
+    }
   }
 
   _onDataChange(movieController, oldData, newData) {

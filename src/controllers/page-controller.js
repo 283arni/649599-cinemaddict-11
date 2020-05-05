@@ -87,7 +87,6 @@ export default class PageController {
   render() {
     const movies = this._moviesModel.getMovies();
 
-
     render(main, this._sortComponent, PositionElement.BEFOREEND);
     render(main, this._container, PositionElement.BEFOREEND);
 

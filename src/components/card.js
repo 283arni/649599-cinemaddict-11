@@ -3,6 +3,7 @@ import MovieController from '../controllers/movie-controller';
 
 
 const createMovieTamplate = (card) => {
+
   const {title, poster, genre, rating, time, description, countComments, year, activedWatchlist, activedWatched, activedFavorite} = card;
 
   const choosedWatchlist = activedWatchlist ? `film-card__controls-item--active` : ``;

@@ -9,20 +9,19 @@ const KEY_ENTER = `Enter`;
 const KEY_CONTROL = `Control`;
 
 const newComment = {
-  name: `sleeping`,
-  emoji: `./images/emoji/sleeping.png`,
+  emotion: `sleeping`,
   author: `Tim Macoveev`,
   text: `Booooooooooring`,
   date: moment(`20100214`).format(`YYYY/MM/DD hh:mm`)
 };
 
-const createCommentTemplate = (comment) => {
-  const {name, emoji, author, text, date} = comment;
-  const filtredText = encode(text);
+const createCommentTemplate = (review) => {
+  const {emotion, author, comment, date} = review;
+  const filtredText = encode(comment);
   return (
     `<li class="film-details__comment">
     <span class="film-details__comment-emoji">
-      <img src="${emoji}" width="55" height="55" alt="emoji-${name}">
+      <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">
     </span>
     <div>
       <p class="film-details__comment-text">${filtredText}</p>
@@ -58,8 +57,10 @@ const createItemInfo = (informations) => {
 
 const createPopupDetailsTemplate = (card, reviews, options = {}) => {
 
-  const {title, poster, rating, description, countComments} = card;
-  const discussion = reviews.map((comment) => {
+console.log(reviews)
+  const {title, poster, rating, description, countComments, comments} = card;
+
+  const discussion = comments.map((comment) => {
     return createCommentTemplate(comment);
   }).join(`\n`);
 
@@ -68,7 +69,8 @@ const createPopupDetailsTemplate = (card, reviews, options = {}) => {
   delete cloneCard.title;
   delete cloneCard.poster;
   delete cloneCard.rating;
-  delete cloneCard.countComments;
+  delete cloneCard.rating;
+  delete cloneCard.comments;
   delete cloneCard.description;
   delete cloneCard.activedWatchlist;
   delete cloneCard.activedWatched;
@@ -78,9 +80,9 @@ const createPopupDetailsTemplate = (card, reviews, options = {}) => {
   const arrCard = Object.entries(cloneCard);
   const info = arrCard.map((item) => createItemInfo(item)).join(`\n`);
 
-  const {activedWatchlist, activedWatched, activedFavorite, emoji} = options;
+  const {activedWatchlist, activedWatched, activedFavorite, emotion} = options;
 
-  const chooseEmoji = emoji ? `<img src="${emoji.src}" width="30" height="30" alt="emoji">` : ``;
+  const chooseEmoji = emotion ? `<img src="./images/emoji/${emotion}.png" width="30" height="30" alt="emoji">` : ``;
   const choosedWatchlist = activedWatchlist ? `checked` : ``;
   const choosedWatched = activedWatched ? `checked` : ``;
   const choosedFavorite = activedFavorite ? `checked` : ``;
@@ -135,7 +137,7 @@ const createPopupDetailsTemplate = (card, reviews, options = {}) => {
 
         <div class="form-details__bottom-container">
           <section class="film-details__comments-wrap">
-            <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${countComments}</span></h3>
+            <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
 
             <ul class="film-details__comments-list">
               ${discussion}
@@ -178,16 +180,16 @@ const createPopupDetailsTemplate = (card, reviews, options = {}) => {
 };
 
 export default class Popup extends AbstractSmartComponent {
-  constructor(card, comments) {
+  constructor(card) {
     super();
 
-    this._comments = comments;
     this._newComment = null;
     this._card = card;
+    this._comments = card.comments;
     this._closeHandler = null;
     this.watchedHandler = null;
 
-    this._copyComments = this._comments.slice();
+    this._copyComments = this._comments.map((comment) => ({...comment}));
   }
 
   getTemplate() {
@@ -195,7 +197,7 @@ export default class Popup extends AbstractSmartComponent {
       activedWatchlist: this.activedWatchlist,
       activedWatched: this.activedWatched,
       activedFavorite: this.activedFavorite,
-      emoji: this.emoji
+      emotion: this.emotion
     });
   }
 
@@ -246,9 +248,7 @@ export default class Popup extends AbstractSmartComponent {
 
         emojiDiv.append(emoji.firstElementChild.cloneNode());
 
-        newComment.emoji = emoji.firstElementChild.src;
-        newComment.name = emoji.previousElementSibling.value;
-
+        newComment.emotion = emoji.previousElementSibling.value;
       });
     });
     // добавление нового коммента при нажатии Ctrl + Enter

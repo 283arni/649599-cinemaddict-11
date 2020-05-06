@@ -55,10 +55,9 @@ const createItemInfo = (informations) => {
   );
 };
 
-const createPopupDetailsTemplate = (card, reviews, options = {}) => {
+const createPopupDetailsTemplate = (card, options = {}) => {
 
-console.log(reviews)
-  const {title, poster, rating, description, countComments, comments} = card;
+  const {title, poster, rating, description, comments} = card;
 
   const discussion = comments.map((comment) => {
     return createCommentTemplate(comment);
@@ -185,15 +184,13 @@ export default class Popup extends AbstractSmartComponent {
 
     this._newComment = null;
     this._card = card;
-    this._comments = card.comments;
     this._closeHandler = null;
     this.watchedHandler = null;
 
-    this._copyComments = this._comments.map((comment) => ({...comment}));
   }
 
   getTemplate() {
-    return createPopupDetailsTemplate(this._card, this._copyComments, {
+    return createPopupDetailsTemplate(this._card, {
       activedWatchlist: this.activedWatchlist,
       activedWatched: this.activedWatched,
       activedFavorite: this.activedFavorite,
@@ -255,7 +252,7 @@ export default class Popup extends AbstractSmartComponent {
     this.runOnKeys(element.querySelector(`textarea`), () => {
       this.emoji = null;
 
-      this._copyComments.push(Object.assign({}, newComment));
+      this._card.comments.push(Object.assign({}, newComment));
 
       this.rerender();
     }, KEY_CONTROL, KEY_ENTER);

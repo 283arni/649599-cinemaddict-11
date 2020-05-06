@@ -4,7 +4,7 @@ import MovieController from '../controllers/movie-controller';
 
 const createMovieTamplate = (card) => {
 
-  const {title, poster, genre, rating, time, description, countComments, year, activedWatchlist, activedWatched, activedFavorite} = card;
+  const {title, poster, genre, rating, time, description, comments, year, activedWatchlist, activedWatched, activedFavorite} = card;
 
   const choosedWatchlist = activedWatchlist ? `film-card__controls-item--active` : ``;
   const choosedWatched = activedWatched ? `film-card__controls-item--active` : ``;
@@ -21,7 +21,7 @@ const createMovieTamplate = (card) => {
       </p>
       <img src="${poster}" alt="" class="film-card__poster">
       <p class="film-card__description">${description}</p>
-      <a class="film-card__comments">${countComments} comments</a>
+      <a class="film-card__comments">${comments.length} comments</a>
       <form class="film-card__controls">
         <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${choosedWatchlist}">Add to watchlist</button>
         <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${choosedWatched}">Mark as watched</button>

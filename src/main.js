@@ -13,13 +13,13 @@ const AUTHORIZATION = `Basic dXNlckBwYXsd8d29yZAo=`;
 const header = document.querySelector(`.header`);
 const main = document.querySelector(`.main`);
 const footerStatistics = document.querySelector(`.footer__statistics`);
+const api = new API(AUTHORIZATION);
 
 
 const moviesModel = new MoviesModel();
 const filterController = new FilterController(main, moviesModel);
 const contentComponent = new ContentComponent();
-const contentController = new PageController(contentComponent, moviesModel);
-const api = new API(AUTHORIZATION);
+const contentController = new PageController(contentComponent, moviesModel, api);
 
 
 render(header, new RankComponent(), PositionElement.BEFOREEND);

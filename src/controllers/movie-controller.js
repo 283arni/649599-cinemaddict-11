@@ -1,6 +1,7 @@
 import {remove, replace, PositionElement, render} from '../utils/render';
 import CardComponent from '../components/card';
 import PopupComponent from '../components/popup';
+import MovieModel from '../models/movie';
 
 const body = document.querySelector(`body`);
 
@@ -26,26 +27,30 @@ export default class MovieController {
 
     this._cardComponent.setWatchlistClickHandler((e) => {
       e.preventDefault();
-      this._onDataChange(this, card, Object.assign({}, card, {
-        activedWatchlist: !card.activedWatchlist
-      }));
+      const newMovie = MovieModel.clone(card);
+
+      newMovie.activedWatchlist = !newMovie.activedWatchlist;
+
+      this._onDataChange(this, card, newMovie);
     });
 
     this._cardComponent.setWatchedClickHandler((e) => {
       e.preventDefault();
-      this._onDataChange(this, card, Object.assign({}, card, {
-        activedWatched: !card.activedWatched
-      }));
 
+      const newMovie = MovieModel.clone(card);
 
+      newMovie.activedWatched = !newMovie.activedWatched;
+
+      this._onDataChange(this, card, newMovie);
     });
 
     this._cardComponent.setFavoriteClickHandler((e) => {
       e.preventDefault();
+      const newMovie = MovieModel.clone(card);
 
-      this._onDataChange(this, card, Object.assign({}, card, {
-        activedFavorite: !card.activedFavorite
-      }));
+      newMovie.activedFavorite = !newMovie.activedFavorite;
+
+      this._onDataChange(this, card, newMovie);
     });
 
     if (oldCardComponent) {

@@ -56,7 +56,6 @@ const createItemInfo = (informations) => {
 };
 
 const createPopupDetailsTemplate = (card, options = {}) => {
-
   const {title, poster, rating, description, comments} = card;
 
   const discussion = comments.map((comment) => {
@@ -186,7 +185,6 @@ export default class Popup extends AbstractSmartComponent {
     this._card = card;
     this._closeHandler = null;
     this.watchedHandler = null;
-
   }
 
   getTemplate() {

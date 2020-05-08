@@ -8,12 +8,13 @@ import AmountMoviesComponent from './components/amount-all-movies';
 
 import {PositionElement, render} from './utils/render';
 
-const AUTHORIZATION = `Basic dXNlckBwYXsd8d29yZAo=`;
+const AUTHORIZATION = `Basic dXNlckBwYXssdd29yZAo=`;
+const URL = `https://11.ecmascript.pages.academy/cinemaddict/`;
 
 const header = document.querySelector(`.header`);
 const main = document.querySelector(`.main`);
 const footerStatistics = document.querySelector(`.footer__statistics`);
-const api = new API(AUTHORIZATION);
+const api = new API(URL, AUTHORIZATION);
 
 
 const moviesModel = new MoviesModel();
@@ -29,6 +30,7 @@ filterController.render();
 
 api.getMovies()
   .then((cards) => {
+    cards.map((card) => api.getComments(card));
     moviesModel.setMovies(cards);
     contentController.render();
   });

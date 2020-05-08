@@ -58,9 +58,10 @@ const getSortedCards = (tasks, sortType, from, to) => {
 
 
 export default class PageController {
-  constructor(container, moviesModel) {
+  constructor(container, moviesModel, api) {
     this._container = container;
     this._moviesModel = moviesModel;
+    this._api = api;
 
     this._showedMoviesControllers = [];
     this._showedMoviesExtraControllers = [];
@@ -87,7 +88,6 @@ export default class PageController {
   render() {
     const movies = this._moviesModel.getMovies();
 
-
     render(main, this._sortComponent, PositionElement.BEFOREEND);
     render(main, this._container, PositionElement.BEFOREEND);
 
@@ -102,7 +102,6 @@ export default class PageController {
     this._showedMoviesControllers = this._showedMoviesControllers.concat(newCards);
 
     this._renderButtonMore();
-
 
     render(this._container.getElement(), this._listTopComponent, PositionElement.BEFOREEND);
     render(this._container.getElement(), this._listMostComponent, PositionElement.BEFOREEND);
@@ -151,7 +150,6 @@ export default class PageController {
 
     this._removeMovies();
     this._renderMovies(movies.slice(0, count));
-    this.showingCardsCount = Quantity.RENDER_MOVIES;
 
     if (movies.length <= this.showingCardsCount) {
       remove(this._buttonMoreComponent);
@@ -161,11 +159,16 @@ export default class PageController {
   }
 
   _onDataChange(movieController, oldData, newData) {
-    const isSuccess = this._moviesModel.updateMovie(oldData.id, newData);
 
-    if (isSuccess) {
-      movieController.render(newData);
-    }
+    this._api.updateMovie(oldData.id, newData)
+    .then((movieModel) => {
+      const isSuccess = this._moviesModel.updateMovie(oldData.id, movieModel);
+
+      if (isSuccess) {
+        movieController.render(movieModel);
+        this._updateMovies(this.showingCardsCount);
+      }
+    });
   }
 
   _removeMovies() {
@@ -186,7 +189,9 @@ export default class PageController {
   }
 
   _onFilterChange() {
-    this._updateMovies(Quantity.RENDER_MOVIES);
+    this.showingCardsCount = Quantity.RENDER_MOVIES;
+
+    this._updateMovies(this.showingCardsCount);
     this._sortComponent.setActiveSort(SortType.DEFAULT);
   }
 }

@@ -20,6 +20,7 @@ const newComment = {
   date: `${new Date()}`
 };
 
+
 const createCommentTemplate = (review) => {
   const {id, emotion, author, comment, date} = review;
   const filtredText = encode(comment);

@@ -22,8 +22,6 @@ const API = class {
   }
 
   getMovies() {
-    const headers = new Headers();
-    headers.append(`Authorization`, this._authorization);
 
     return this._load({tag: `movies`})
       .then((response) => response.json())
@@ -31,9 +29,6 @@ const API = class {
   }
 
   getComments(movie) {
-    const headers = new Headers();
-    headers.append(`Authorization`, this._authorization);
-
     return this._load({tag: `comments/${movie.id}`})
       .then((response) => response.json())
       .then((response) => {
@@ -43,11 +38,27 @@ const API = class {
       });
   }
 
-  updateMovie(id, data) {
-    const headers = new Headers();
-    headers.append(`Authorization`, this._authorization);
-    headers.append(`Content-Type`, `application/json`);
+  createComment(id, comment) {
+    return this._load({
+      tag: `comments/${id}`,
+      method: Method.POST,
+      body: JSON.stringify(comment),
+      headers: new Headers({"Content-Type": `application/json`})
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        response.movie.comments = response.comments;
 
+        return response.movie;
+      })
+      .then(Movie.parseMovie);
+  }
+
+  deleteComment(id) {
+    return this._load({tag: `comments/${id}`, method: Method.DELETE});
+  }
+
+  updateMovie(id, data) {
     return this._load({
       tag: `movies/${id}`,
       method: Method.PUT,

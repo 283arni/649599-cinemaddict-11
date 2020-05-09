@@ -3,15 +3,15 @@ export default class Movie {
     this.id = data.id;
     this.title = data.film_info.alternative_title;
     this.poster = data.film_info.poster;
-    this.director = [data.film_info.director];
-    this.writers = [...data.film_info.writers];
-    this.actors = [...data.film_info.actors];
+    this.director = data.film_info.director;
+    this.writers = data.film_info.writers.slice(`,`).join(`, `);
+    this.actors = data.film_info.actors.slice(`,`).join(`, `);
     this.rating = data.film_info.total_rating;
     this.releaseDate = data.film_info.release.date;
     this.time = data.film_info.runtime;
     this.country = data.film_info.release.release_country;
     this.description = data.film_info.description;
-    this.genre = [...data.film_info.genre];
+    this.genre = data.film_info.genre.slice(`,`).join(`, `);
     this.activedWatchlist = data.user_details.watchlist;
     this.activedWatched = data.user_details.already_watched;
     this.activedFavorite = data.user_details.favorite;
@@ -28,15 +28,15 @@ export default class Movie {
         "total_rating": this.rating,
         "poster": this.poster,
         "age_rating": 0,
-        "director": `${this.director}`,
-        "writers": this.writers,
-        "actors": this.actors,
+        "director": this.director,
+        "writers": [...this.writers],
+        "actors": [...this.actors],
         "release": {
           "date": this.releaseDate,
           "release_country": this.country
         },
         "runtime": this.time,
-        "genre": this.genre,
+        "genre": [...this.genre],
         "description": this.description
       },
       "user_details": {

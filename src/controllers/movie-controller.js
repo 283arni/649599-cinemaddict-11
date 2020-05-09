@@ -5,13 +5,15 @@ import MovieModel from '../models/movie';
 
 const body = document.querySelector(`body`);
 
+
 export default class MovieController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange, api) {
 
     this._container = container;
     this._onDataChange = onDataChange;
 
     this._card = null;
+    this._api = api;
     this._cardComponent = null;
     this._popupComponent = null;
     this._onViewChange = onViewChange;
@@ -21,7 +23,7 @@ export default class MovieController {
     const oldCardComponent = this._cardComponent;
 
     this._cardComponent = new CardComponent(card);
-    this._popupComponent = new PopupComponent(card);
+    this._popupComponent = new PopupComponent(card, this._api);
 
     this._cardComponent.setClickElementCard(this._popupComponent, this._onViewChange);
 

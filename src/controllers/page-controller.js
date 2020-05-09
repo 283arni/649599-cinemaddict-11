@@ -15,7 +15,7 @@ const Quantity = {
 
 const main = document.querySelector(`.main`);
 
-const renderCardsInContainer = (component, movies, onDataChange, onViewChange, inContainer = false) => {
+const renderCardsInContainer = (component, movies, onDataChange, onViewChange, api, inContainer = false) => {
 
   let container = null;
   let elementContainer = null;
@@ -30,7 +30,7 @@ const renderCardsInContainer = (component, movies, onDataChange, onViewChange, i
   }
 
   return movies.map((movie) => {
-    const movieController = new MovieController(elementContainer, onDataChange, onViewChange);
+    const movieController = new MovieController(elementContainer, onDataChange, onViewChange, api);
     movieController.render(movie);
 
     return movieController;
@@ -46,7 +46,7 @@ const getSortedCards = (tasks, sortType, from, to) => {
       sortedCards = showingTasks.sort((a, b) => b.rating - a.rating);
       break;
     case SortType.DATE:
-      sortedCards = showingTasks.sort((a, b) => b.year - a.year);
+      sortedCards = showingTasks.sort((a, b) => b.releaseDate.substring(0, 4) - a.releaseDate.substring(0, 4));
       break;
     case SortType.DEFAULT:
       sortedCards = showingTasks;
@@ -98,7 +98,7 @@ export default class PageController {
       return;
     }
 
-    const newCards = renderCardsInContainer(moveisList, movies.slice(0, Quantity.RENDER_MOVIES), this._onDataChange, this._onViewChange);
+    const newCards = renderCardsInContainer(moveisList, movies.slice(0, Quantity.RENDER_MOVIES), this._onDataChange, this._onViewChange, this._api);
     this._showedMoviesControllers = this._showedMoviesControllers.concat(newCards);
 
     this._renderButtonMore();
@@ -109,7 +109,7 @@ export default class PageController {
     const listsExtra = this._container.getElement().querySelectorAll(`.films-list--extra`);
 
     listsExtra.forEach((elem) => {
-      const newCardsExtra = renderCardsInContainer(elem, movies.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange);
+      const newCardsExtra = renderCardsInContainer(elem, movies.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
       this._showedMoviesExtraControllers = this._showedMoviesExtraControllers.concat(newCardsExtra);
     });
   }
@@ -137,7 +137,7 @@ export default class PageController {
 
     const sortedCards = getSortedCards(movies, this._sortComponent.getSortType());
 
-    const newCards = renderCardsInContainer(this._container, sortedCards.slice(prevCardsCount, this.showingCardsCount), this._onDataChange, this._onViewChange, true);
+    const newCards = renderCardsInContainer(this._container, sortedCards.slice(prevCardsCount, this.showingCardsCount), this._onDataChange, this._onViewChange, this._api, true);
     this._showedMoviesControllers = this._showedMoviesControllers.concat(newCards);
 
     if (this.showingCardsCount >= movies.length) {
@@ -159,7 +159,6 @@ export default class PageController {
   }
 
   _onDataChange(movieController, oldData, newData) {
-
     this._api.updateMovie(oldData.id, newData)
     .then((movieModel) => {
       const isSuccess = this._moviesModel.updateMovie(oldData.id, movieModel);
@@ -177,7 +176,7 @@ export default class PageController {
   }
 
   _renderMovies(movies) {
-    const newMovies = renderCardsInContainer(this._container, movies, this._onDataChange, this._onViewChange, true);
+    const newMovies = renderCardsInContainer(this._container, movies, this._onDataChange, this._onViewChange, this._api, true);
 
     this._showedMoviesControllers = this._showedMoviesControllers.concat(newMovies);
     this._showedMoviesCount = this._showedMoviesControllers.length;

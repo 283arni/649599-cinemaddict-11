@@ -9,7 +9,7 @@ import AmountMoviesComponent from './components/amount-all-movies';
 import {PositionElement, render} from './utils/render';
 
 const AUTHORIZATION = `Basic dXNlckBwYXssdd29yZAo=`;
-const URL = `https://11.ecmascript.pages.academy/cinemaddict/`;
+const URL = `https://11.ecmascript.pages.academy/cinemaddict`;
 
 const header = document.querySelector(`.header`);
 const main = document.querySelector(`.main`);

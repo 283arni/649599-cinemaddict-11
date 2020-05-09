@@ -1,49 +1,61 @@
 
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import {encode} from "he";
+import {getTimeFromMins} from '../utils/changer';
 import moment from 'moment';
 
 const CAPITAL_LITTER = 0;
 const FROM_SLICE_STRING = 1;
-const KEY_ENTER = `Enter`;
-const KEY_CONTROL = `Control`;
+const PRESS_KEYS = 2;
+
+const Key = {
+  ENTER: `Enter`,
+  CONTROL: `Control`,
+  CMD: `Command`
+};
 
 const newComment = {
   emotion: `sleeping`,
-  author: `Tim Macoveev`,
-  text: `Booooooooooring`,
-  date: moment(`20100214`).format(`YYYY/MM/DD hh:mm`)
+  comment: `Booooooooooring`,
+  date: `${new Date()}`
 };
 
 const createCommentTemplate = (review) => {
-  const {emotion, author, comment, date} = review;
+  const {id, emotion, author, comment, date} = review;
   const filtredText = encode(comment);
+
   return (
-    `<li class="film-details__comment">
-    <span class="film-details__comment-emoji">
-      <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">
-    </span>
-    <div>
-      <p class="film-details__comment-text">${filtredText}</p>
-      <p class="film-details__comment-info">
-        <span class="film-details__comment-author">${author}</span>
-        <span class="film-details__comment-day">${date}</span>
-        <button class="film-details__comment-delete">Delete</button>
-      </p>
-    </div>
-  </li>`
+    `<li class="film-details__comment" id="${id}">
+      <span class="film-details__comment-emoji">
+        <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">
+      </span>
+      <div>
+        <p class="film-details__comment-text">${filtredText}</p>
+        <p class="film-details__comment-info">
+          <span class="film-details__comment-author">${author}</span>
+          <span class="film-details__comment-day">${moment([date]).format(`DD/MMMM/YYYY HH:MM`)}</span>
+          <button class="film-details__comment-delete">Delete</button>
+        </p>
+      </div>
+    </li>`
   );
 };
 
 const createItemInfo = (informations) => {
-  const [first, second] = informations;
+
+  let [first, second] = informations;
+  if (first === `releaseDate`) {
+    first = `release date`;
+    second = moment(second).format(`DD MMMM YYYY`);
+  }
+
   const firstUpper = first[CAPITAL_LITTER].toUpperCase() + first.substring(FROM_SLICE_STRING);
 
   return (
     `${firstUpper !== `Genre` ?
       `<tr class="film-details__row">
         <td class="film-details__term">${firstUpper}</td>
-        <td class="film-details__cell">${second}</td>
+        <td class="film-details__cell">${typeof second === `number` ? getTimeFromMins(second) : second}</td>
       </tr>`
       :
       `<tr class="film-details__row">
@@ -178,11 +190,12 @@ const createPopupDetailsTemplate = (card, options = {}) => {
 };
 
 export default class Popup extends AbstractSmartComponent {
-  constructor(card) {
+  constructor(card, api) {
     super();
 
     this._newComment = null;
     this._card = card;
+    this._api = api;
     this._closeHandler = null;
     this.watchedHandler = null;
   }
@@ -246,27 +259,30 @@ export default class Popup extends AbstractSmartComponent {
         newComment.emotion = emoji.previousElementSibling.value;
       });
     });
+
     // добавление нового коммента при нажатии Ctrl + Enter
     this.runOnKeys(element.querySelector(`textarea`), () => {
       this.emoji = null;
-
-      this._card.comments.push(Object.assign({}, newComment));
-
-      this.rerender();
-    }, KEY_CONTROL, KEY_ENTER);
-
-    element.querySelector(`textarea`).addEventListener(`input`, (evt) => {
-      newComment.text = evt.target.value;
+      this._api.createComment(this._card.id, newComment)
+        .then((movie) => {
+          this._card = movie;
+          this.rerender();
+        });
     });
 
-    const deleteBtns = element.querySelectorAll(`.film-details__comment-delete`);
+    element.querySelector(`textarea`).addEventListener(`input`, (evt) => {
+      newComment.comment = evt.target.value;
+    });
 
-    deleteBtns.forEach((button, i) => {
-      button.addEventListener(`click`, (e) => {
+    const reviews = element.querySelectorAll(`.film-details__comment`);
+
+    reviews.forEach((review) => {
+      review.querySelector(`.film-details__comment-delete`).addEventListener(`click`, (e) => {
         e.preventDefault();
-        this._copyComments = this._copyComments.filter((review, j) => i !== j);
+        this._api.deleteComment(review.id);
+        this._card.comments = this._card.comments.filter((comment) => comment.id !== review.id);
 
-        this.rerender();
+        review.remove();
       });
     });
   }
@@ -278,25 +294,28 @@ export default class Popup extends AbstractSmartComponent {
     this._closeHandler = handler;
   }
 
-  runOnKeys(elem, func, ...codes) {
-    let pressed = new Set();
+  runOnKeys(elem, add) {
+    const arr = new Set();
 
     elem.addEventListener(`keydown`, (event) => {
-      pressed.add(event.key);
-
-      for (let code of codes) {
-        if (!pressed.has(code)) {
-          return;
-        }
+      arr.delete(event.key);
+      if (event.key === Key.CONTROL || event.key === Key.CMD) {
+        arr.add(event.key);
       }
-
-      pressed.clear();
-
-      func();
     });
 
     elem.addEventListener(`keyup`, (event) => {
-      pressed.delete(event.key);
+      arr.delete(event.key);
+      if (event.key === Key.ENTER) {
+        arr.add(event.key);
+
+        if (arr.size < PRESS_KEYS) {
+          return;
+        }
+
+        add();
+      }
     });
+
   }
 }

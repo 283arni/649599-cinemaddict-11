@@ -5,6 +5,7 @@ import ContainerComponent from '../components/container';
 import MovieController from '../controllers/movie-controller';
 import SortComponent, {SortType} from '../components/sort';
 import NoMoviesComponent from '../components/no-movies';
+import LoadingMovies from '../components/loading-movie';
 import {remove, replaceTitle, PositionElement, render} from '../utils/render';
 
 const Quantity = {
@@ -72,6 +73,7 @@ export default class PageController {
     this._listMostComponent = new ListMostComponent();
     this._noMoviesComponent = new NoMoviesComponent();
     this._sortComponent = new SortComponent();
+    this._loadingMovies = new LoadingMovies();
 
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
@@ -94,7 +96,7 @@ export default class PageController {
     const moveisList = this._container.getElement().querySelector(`.films-list`);
 
     if (!movies.length) {
-      replaceTitle(this._noMoviesComponent, this._content);
+      replaceTitle(this._noMoviesComponent, this._container);
       return;
     }
 

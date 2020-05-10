@@ -7,6 +7,8 @@ import moment from 'moment';
 const CAPITAL_LITTER = 0;
 const FROM_SLICE_STRING = 1;
 const PRESS_KEYS = 2;
+const TIME_ANIMATION = 600;
+const MILLISECONDS = 1000;
 
 const Key = {
   ENTER: `Enter`,
@@ -18,6 +20,10 @@ const newComment = {
   emotion: `sleeping`,
   comment: `Booooooooooring`,
   date: `${new Date()}`
+};
+
+const filterComments = (comments, id) => {
+  return comments.filter((comment) => comment.id !== id);
 };
 
 
@@ -34,7 +40,7 @@ const createCommentTemplate = (review) => {
         <p class="film-details__comment-text">${filtredText}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
-          <span class="film-details__comment-day">${moment([date]).format(`DD/MMMM/YYYY HH:MM`)}</span>
+          <span class="film-details__comment-day">${moment(new Date(date)).format(`DD/MMMM/YYYY HH:MM`)}</span>
           <button class="film-details__comment-delete">Delete</button>
         </p>
       </div>
@@ -245,6 +251,8 @@ export default class Popup extends AbstractSmartComponent {
 
     const emojies = element.querySelectorAll(`.film-details__emoji-label`);
     const emojiDiv = element.querySelector(`.film-details__add-emoji-label`);
+    const elemNewComment = this.getElement().querySelector(`.film-details__new-comment`);
+    const textarea = element.querySelector(`textarea`);
 
 
     emojies.forEach((emoji) => {
@@ -262,30 +270,66 @@ export default class Popup extends AbstractSmartComponent {
     });
 
     // добавление нового коммента при нажатии Ctrl + Enter
-    this.runOnKeys(element.querySelector(`textarea`), () => {
+    this.runOnKeys(textarea, () => {
       this.emoji = null;
+
+      textarea.style.border = `solid 1px #979797`;
+      textarea.setAttribute(`disabled`, true);
+
       this._api.createComment(this._card.id, newComment)
         .then((movie) => {
           this._card = movie;
           this.rerender();
+        })
+        .catch(() => {
+          textarea.disabled = false;
+          this.shake(elemNewComment, textarea);
         });
     });
 
-    element.querySelector(`textarea`).addEventListener(`input`, (evt) => {
+
+    textarea.addEventListener(`input`, (evt) => {
       newComment.comment = evt.target.value;
     });
 
     const reviews = element.querySelectorAll(`.film-details__comment`);
 
     reviews.forEach((review) => {
-      review.querySelector(`.film-details__comment-delete`).addEventListener(`click`, (e) => {
+      const btnDelete = review.querySelector(`.film-details__comment-delete`);
+      btnDelete.addEventListener(`click`, (e) => {
         e.preventDefault();
-        this._api.deleteComment(review.id);
-        this._card.comments = this._card.comments.filter((comment) => comment.id !== review.id);
 
-        review.remove();
+        btnDelete.setAttribute(`disabled`, true);
+        btnDelete.textContent = `Deleting...`;
+
+        this._api.deleteComment(review.id)
+          .then(() => {
+            filterComments(this._card.comments, review.id);
+
+            review.remove();
+          })
+          .catch(() => {
+            btnDelete.disabled = false;
+            btnDelete.textContent = `Delete`;
+
+            this.shake(review);
+          });
       });
     });
+  }
+
+  shake(container, area) {
+
+    if (area) {
+      area.style.border = `2px solid red`;
+      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
+    } else {
+      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
+    }
+
+    setTimeout(() => {
+      container.style.animation = ``;
+    }, TIME_ANIMATION);
   }
 
   closePopup(handler) {
@@ -295,7 +339,7 @@ export default class Popup extends AbstractSmartComponent {
     this._closeHandler = handler;
   }
 
-  runOnKeys(elem, add) {
+  runOnKeys(elem, addComment) {
     const arr = new Set();
 
     elem.addEventListener(`keydown`, (event) => {
@@ -314,9 +358,8 @@ export default class Popup extends AbstractSmartComponent {
           return;
         }
 
-        add();
+        addComment();
       }
     });
-
   }
 }

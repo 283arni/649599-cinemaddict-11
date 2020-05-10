@@ -22,7 +22,6 @@ const API = class {
   }
 
   getMovies() {
-
     return this._load({tag: `movies`})
       .then((response) => response.json())
       .then(Movie.parseMovies);

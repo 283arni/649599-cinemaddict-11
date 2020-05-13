@@ -29,6 +29,7 @@ const filterComments = (comments, id) => {
 
 const createCommentTemplate = (review) => {
   const {id, emotion, author, comment, date} = review;
+
   const filtredText = encode(comment);
 
   return (
@@ -75,7 +76,7 @@ const createItemInfo = (informations) => {
 };
 
 const createPopupDetailsTemplate = (card, options = {}) => {
-  const {title, poster, rating, description, comments} = card;
+  const {title, poster, rating, description, comments, age} = card;
 
   const discussion = comments.map((comment) => {
     return createCommentTemplate(comment);
@@ -93,6 +94,7 @@ const createPopupDetailsTemplate = (card, options = {}) => {
   delete cloneCard.activedWatched;
   delete cloneCard.activedFavorite;
   delete cloneCard.emoji;
+  delete cloneCard.age;
 
   const arrCard = Object.entries(cloneCard);
   const info = arrCard.map((item) => createItemInfo(item)).join(`\n`);
@@ -103,6 +105,7 @@ const createPopupDetailsTemplate = (card, options = {}) => {
   const choosedWatchlist = activedWatchlist ? `checked` : ``;
   const choosedWatched = activedWatched ? `checked` : ``;
   const choosedFavorite = activedFavorite ? `checked` : ``;
+  const setAge = age ? `${age}+` : age;
 
   return (
     `<section class="film-details">
@@ -115,7 +118,7 @@ const createPopupDetailsTemplate = (card, options = {}) => {
             <div class="film-details__poster">
               <img class="film-details__poster-img" src="${poster}" alt="">
 
-              <p class="film-details__age">18+</p>
+              <p class="film-details__age">${setAge}</p>
             </div>
 
             <div class="film-details__info">

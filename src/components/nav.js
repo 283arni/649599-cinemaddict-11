@@ -1,7 +1,7 @@
 import AbstractComponent from './abstract-component';
 
 const setActiveClass = function (evt, element) {
-  const filtersList = element.querySelectorAll(`.main-navigation__item`);
+  const filtersList = element.querySelectorAll(`a`);
 
   filtersList.forEach((filter) => {
     filter.classList.remove(`main-navigation__item--active`);
@@ -24,6 +24,7 @@ const creatNavItemTemplate = (tab) => {
 };
 
 const createStatisticTamplate = (array) => {
+
   const menuItems = array.map((item) => creatNavItemTemplate(item)).join(`\n`);
 
   return (
@@ -31,7 +32,7 @@ const createStatisticTamplate = (array) => {
       <div class="main-navigation__items">
         ${menuItems}
       </div>
-      <a href="#stats" class="main-navigation__additional">Stats</a>
+      <a href="#Stats" data-name="Stats" class="main-navigation__additional">Stats</a>
     </nav>`
   );
 };

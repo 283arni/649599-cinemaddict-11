@@ -1,4 +1,4 @@
-import Movie from './models/movie';
+import Movie from '../models/movie';
 
 const Method = {
   GET: `GET`,
@@ -24,8 +24,10 @@ const API = class {
   getMovies() {
     return this._load({tag: `movies`})
       .then((response) => response.json())
+      .then((movies) => Promise.all(movies.map((movie) => this.getComments(movie))))
       .then(Movie.parseMovies);
   }
+
 
   getComments(movie) {
     return this._load({tag: `comments/${movie.id}`})
@@ -66,7 +68,7 @@ const API = class {
     })
       .then((response) => response.json())
       .then(Movie.parseMovie)
-      .then((movie) => this.getComments(movie));
+      .then((card) => this.getComments(card));
   }
 
   _load({tag, method = Method.GET, body = null, headers = new Headers()}) {

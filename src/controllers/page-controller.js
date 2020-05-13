@@ -3,7 +3,7 @@ import ListTopComponent from '../components/list-top';
 import ListMostComponent from '../components/list-most';
 import ContainerComponent from '../components/container';
 import MovieController from '../controllers/movie-controller';
-import SortComponent, {SortType} from '../components/sort';
+import {SortType} from '../components/sort';
 import NoMoviesComponent from '../components/no-movies';
 import LoadingMovies from '../components/loading-movie';
 import {remove, replaceTitle, PositionElement, render} from '../utils/render';
@@ -59,7 +59,7 @@ const getSortedCards = (tasks, sortType, from, to) => {
 
 
 export default class PageController {
-  constructor(container, moviesModel, api) {
+  constructor(container, sortComponent, moviesModel, api) {
     this._container = container;
     this._moviesModel = moviesModel;
     this._api = api;
@@ -72,7 +72,7 @@ export default class PageController {
     this._listTopComponent = new ListTopComponent();
     this._listMostComponent = new ListMostComponent();
     this._noMoviesComponent = new NoMoviesComponent();
-    this._sortComponent = new SortComponent();
+    this._sortComponent = sortComponent;
     this._loadingMovies = new LoadingMovies();
 
     this._onDataChange = this._onDataChange.bind(this);
@@ -85,6 +85,14 @@ export default class PageController {
     this._sortComponent.setSortTypeChangeHandler(this._sortMoviesRender);
     this._moviesModel.setFilterChangeHandler(this._onFilterChange);
 
+  }
+
+  hide() {
+    this._container.hide();
+  }
+
+  show() {
+    this._container.show();
   }
 
   render() {
@@ -161,6 +169,7 @@ export default class PageController {
   }
 
   _onDataChange(movieController, oldData, newData) {
+
     this._api.updateMovie(oldData.id, newData)
     .then((movieModel) => {
       const isSuccess = this._moviesModel.updateMovie(oldData.id, movieModel);

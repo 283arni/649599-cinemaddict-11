@@ -5,7 +5,7 @@ import moment from 'moment';
 
 const createMovieTamplate = (card) => {
 
-  const {title, poster, genre, rating, time, description, comments, releaseDate, activedWatchlist, activedWatched, activedFavorite} = card;
+  const {title, poster, genre, rating, time, description, comments, releaseDate, activedWatchlist, activedWatched, activedFavorite, altTitle} = card;
 
   const choosedWatchlist = activedWatchlist ? `film-card__controls-item--active` : ``;
   const choosedWatched = activedWatched ? `film-card__controls-item--active` : ``;
@@ -20,7 +20,7 @@ const createMovieTamplate = (card) => {
         <span class="film-card__duration">${getTimeFromMins(time)}</span>
         <span class="film-card__genre">${genre}</span>
       </p>
-      <img src="${poster}" alt="${title}" class="film-card__poster">
+      <img src="${poster}" alt="${altTitle}" class="film-card__poster">
       <p class="film-card__description">${description}</p>
       <a class="film-card__comments">${comments.length} comments</a>
       <form class="film-card__controls">

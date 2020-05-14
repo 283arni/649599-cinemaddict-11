@@ -48,14 +48,15 @@ export default class FilterController {
     this._activeFilterType = filterType;
     switch (filterType) {
       case STATS:
-        this._statisticComponent.show();
-        this._contentComponent.hide();
-        this._sortComponent.hide();
-        break;
-      case filterType:
         this._statisticComponent.hide();
         this._contentComponent.show();
         this._sortComponent.show();
+        break;
+      case filterType:
+        this._statisticComponent.show();
+        this._contentComponent.hide();
+        this._sortComponent.hide();
+
         break;
     }
   }

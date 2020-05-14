@@ -322,7 +322,6 @@ export default class Popup extends AbstractSmartComponent {
   }
 
   shake(container, area) {
-
     if (area) {
       area.style.border = `2px solid red`;
       container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;

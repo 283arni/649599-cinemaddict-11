@@ -18,6 +18,7 @@ export default class Movie {
     this.activedWatched = data.user_details.already_watched;
     this.activedFavorite = data.user_details.favorite;
     this.comments = data.comments;
+    this.watching = data.user_details.watching_date;
   }
 
   toRAW() {
@@ -44,7 +45,7 @@ export default class Movie {
       "user_details": {
         "watchlist": this.activedWatchlist,
         "already_watched": this.activedWatched,
-        "watching_date": `2019-04-12T16:12:32.554Z`,
+        "watching_date": this.watching,
         "favorite": this.activedFavorite,
       }
     };

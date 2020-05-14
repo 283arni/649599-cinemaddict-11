@@ -25,21 +25,18 @@ const api = new API(URL, AUTHORIZATION);
 const store = new Store(STORE_NAME, window.localStorage);
 const apiWithProvider = new Provider(api, store);
 
-const statisticsComponent = new StatisticsComponent();
+
 const moviesModel = new MoviesModel();
 const contentComponent = new ContentComponent();
 const sortComponent = new SortComponent();
+const statisticsComponent = new StatisticsComponent({movies: moviesModel});
 const filterController = new FilterController(main, moviesModel, sortComponent, statisticsComponent, contentComponent);
-
 const contentController = new PageController(contentComponent, sortComponent, moviesModel, apiWithProvider);
 
 
 render(header, new RankComponent(), PositionElement.BEFOREEND);
 render(footerStatistics, new AmountMoviesComponent(), PositionElement.BEFOREEND);
 
-filterController.render();
-render(main, statisticsComponent, PositionElement.BEFOREEND);
-statisticsComponent.hide();
 
 apiWithProvider.getMovies()
   .then((cards) => {
@@ -47,4 +44,8 @@ apiWithProvider.getMovies()
     contentController.render();
   });
 
+
+filterController.render();
+render(main, statisticsComponent, PositionElement.BEFOREEND);
+statisticsComponent.hide();
 

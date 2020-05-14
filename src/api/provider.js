@@ -24,7 +24,7 @@ export default class Provider {
 
     const storeMovies = Object.values(this._store.getItems());
 
-    return Promise.resolve(Movie.parseTasks(storeMovies));
+    return Promise.resolve(Movie.parseMovies(storeMovies));
   }
 
   createComment(id, comment) {

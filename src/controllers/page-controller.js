@@ -49,6 +49,9 @@ const getSortedCards = (tasks, sortType, from, to) => {
     case SortType.DATE:
       sortedCards = showingTasks.sort((a, b) => b.releaseDate.substring(0, 4) - a.releaseDate.substring(0, 4));
       break;
+    case SortType.COMMENTS:
+      sortedCards = showingTasks.sort((a, b) => b.comments.length - a.comments.length);
+      break;
     case SortType.DEFAULT:
       sortedCards = showingTasks;
       break;
@@ -69,8 +72,8 @@ export default class PageController {
     this.showingCardsCount = Quantity.RENDER_MOVIES;
 
     this._buttonMoreComponent = new ButtonMoreComponent();
-    this._listTopComponent = new ListTopComponent();
-    this._listMostComponent = new ListMostComponent();
+    this._listTopComponent = new ListTopComponent(this._moviesModel.getMoviesAll());
+    this._listMostComponent = new ListMostComponent(this._moviesModel.getMoviesAll());
     this._noMoviesComponent = new NoMoviesComponent();
     this._sortComponent = sortComponent;
     this._loadingMovies = new LoadingMovies();
@@ -119,8 +122,12 @@ export default class PageController {
     const listsExtra = this._container.getElement().querySelectorAll(`.films-list--extra`);
 
     listsExtra.forEach((elem) => {
-      const newCardsExtra = renderCardsInContainer(elem, movies.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
-      this._showedMoviesExtraControllers = this._showedMoviesExtraControllers.concat(newCardsExtra);
+      let sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.COMMENTS, 0, this.showingCardsCount);
+
+      if (elem.classList.contains(`films-list--extra-top`)) {
+        sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.RATING, 0, this.showingCardsCount);
+      }
+      renderCardsInContainer(elem, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
     });
   }
 

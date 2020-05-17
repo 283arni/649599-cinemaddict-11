@@ -1,11 +1,18 @@
 import AbstractSmartComponent from './abstract-smart-component';
 import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import {getTimeFromMins} from '../utils/changer';
+import {getTimeFromMins, getRankUser, watchedMovies} from '../utils/changer';
 import moment from 'moment';
 
 const BAR_HEIGHT = 50;
 
+const interval = {
+  all: `all`,
+  today: `today`,
+  week: `weeks`,
+  month: `months`,
+  year: `years`
+};
 
 const searchTopGenre = (object) => {
   let topGenre = ``;
@@ -32,9 +39,8 @@ const getAllGenres = (movies) => {
 
 
 const myChart = (statisticCtx, cards) => {
-
-
-  const genres = getAllGenres(cards);
+  const watched = watchedMovies(cards);
+  const genres = getAllGenres(watched);
 
   return new Chart(statisticCtx, {
     plugins: [ChartDataLabels],
@@ -95,32 +101,23 @@ const myChart = (statisticCtx, cards) => {
 };
 
 
-const createStatisticsTamplate = (movies) => {
+const createStatisticsTamplate = (cards) => {
 
-  const totalTime = movies.reduce((accum, card) => {
-    return accum + card.time;
-  }, 0);
-
-  const hours = parseInt(getTimeFromMins(totalTime).split(` `)[0], 10);
-  const minutes = parseInt(getTimeFromMins(totalTime).split(` `)[1], 10);
-
-  const genres = getAllGenres(movies);
-  const topGenre = searchTopGenre(genres);
-
+  const userRank = getRankUser(watchedMovies(cards).length);
 
   return (
     `<section class="statistic">
     <p class="statistic__rank">
       Your rank
       <img class="statistic__img" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
-      <span class="statistic__rank-label">Sci-Fighter</span>
+      <span class="statistic__rank-label">${userRank}</span>
     </p>
 
     <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
       <p class="statistic__filters-description">Show stats:</p>
 
       <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" checked>
-      <label for="statistic-all-time" class="statistic__filters-label" data-name="all-time">All time</label>
+      <label for="statistic-all-time" class="statistic__filters-label" data-name="all">All time</label>
 
       <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today">
       <label for="statistic-today" class="statistic__filters-label" data-name="today">Today</label>
@@ -138,15 +135,15 @@ const createStatisticsTamplate = (movies) => {
     <ul class="statistic__text-list">
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">You watched</h4>
-        <p class="statistic__item-text">${movies.length}<span class="statistic__item-description">movies</span></p>
+        <p class="statistic__item-text" data-name="watched"><span class="statistic__item-description">movies</span></p>
       </li>
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">Total duration</h4>
-        <p class="statistic__item-text">${hours} <span class="statistic__item-description">h</span> ${minutes} <span class="statistic__item-description">m</span></p>
+        <p class="statistic__item-text" data-name="time"><span class="statistic__item-description">h</span> <span class="statistic__item-description">m</span></p>
       </li>
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">Top genre</h4>
-        <p class="statistic__item-text">${topGenre}</p>
+        <p class="statistic__item-text" data-name="top"></p>
       </li>
     </ul>
 
@@ -162,30 +159,29 @@ const createStatisticsTamplate = (movies) => {
 export default class Statistic extends AbstractSmartComponent {
   constructor({movies}) {
     super();
-    this._daysChart = null;
+    this._moviesChart = null;
     this._cards = movies;
-    this._watchedMovies = this._cards.getMoviesAll().filter((movie) => movie.activedWatched);
+
 
     this._renderChart();
     this._renderForTime();
-
   }
 
   getTemplate() {
-    return createStatisticsTamplate(this._watchedMovies);
+    return createStatisticsTamplate(this._cards.getMoviesAll());
   }
 
   recoveryListeners() {}
 
   rerender(cards) {
     this._cards = cards;
-    this._watchedMovies = cards.getMoviesAll().filter((movie) => movie.activedWatched);
-
 
     super.rerender();
 
+
     this._renderChart();
     this._renderForTime();
+
   }
 
   show() {
@@ -194,37 +190,64 @@ export default class Statistic extends AbstractSmartComponent {
     this.rerender(this._cards);
   }
 
-  _renderChart() {
-    const height = getAllGenres(this._watchedMovies).size;
+  _renderChart(cards = this._cards.getMoviesAll()) {
+    let newCards = watchedMovies(cards);
+    const height = getAllGenres(newCards).size;
 
+    const element = this.getElement();
     const statisticCtx = this.getElement().querySelector(`.statistic__chart`);
+    const watched = element.querySelector(`[data-name="watched"]`);
+    const time = element.querySelector(`[data-name="time"]`);
+    const top = element.querySelector(`[data-name="top"]`);
 
+    const totalTime = newCards.reduce((accum, card) => {
+      return accum + card.time;
+    }, 0);
+
+    const hours = parseInt(getTimeFromMins(totalTime).split(` `)[0], 10);
+    const minutes = parseInt(getTimeFromMins(totalTime).split(` `)[1], 10);
+
+    const genres = getAllGenres(newCards);
+    const topGenre = searchTopGenre(genres);
+
+    watched.innerHTML = `${newCards.length}<span class="statistic__item-description">movies</span>`;
+    time.innerHTML = `${hours} <span class="statistic__item-description">h</span> ${minutes} <span class="statistic__item-description">m</span>`;
+    top.textContent = `${topGenre}`;
 
     this._resetChart();
     // Обязательно рассчитайте высоту canvas, она зависит от количества элементов диаграммы
     statisticCtx.height = BAR_HEIGHT * height;
-    this._daysChart = myChart(statisticCtx, this._watchedMovies);
+    this._moviesChart = myChart(statisticCtx, newCards);
   }
 
   _resetChart() {
-    if (this._daysChart) {
-      this._daysChart.destroy();
-      this._daysChart = null;
+    if (this._moviesChart) {
+      this._moviesChart.destroy();
+      this._moviesChart = null;
     }
   }
 
   _renderForTime() {
-    const labels = this.getElement().querySelectorAll(`label`);
 
-    let newCards = this._watchedMovies;
+    const labels = this.getElement().querySelectorAll(`label`);
 
     labels.forEach((label) => {
       label.addEventListener(`click`, (e) => {
+        let newCards = null;
         const intervalTime = e.target.dataset.name;
-        if (intervalTime === `year`) {
-
-          newCards = newCards.filter((card) => moment(new Date(card.watching)) > moment(new Date()).subtract(7, `days`));
-
+        switch (intervalTime) {
+          case interval.all:
+            newCards = this._cards.getMoviesAll();
+            this._renderChart(newCards);
+            break;
+          case interval.today:
+            newCards = this._cards.getMoviesAll().filter((card) => moment(new Date(card.watching)) === moment(new Date()));
+            this._renderChart(newCards);
+            break;
+          case intervalTime:
+            newCards = this._cards.getMoviesAll().filter((card) => moment(new Date(card.watching)) >= moment(new Date()).subtract(1, interval[intervalTime]));
+            this._renderChart(newCards);
+            break;
         }
       });
     });

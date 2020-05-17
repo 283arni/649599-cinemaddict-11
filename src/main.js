@@ -33,18 +33,14 @@ const statisticsComponent = new StatisticsComponent({movies: moviesModel});
 const filterController = new FilterController(main, moviesModel, sortComponent, statisticsComponent, contentComponent);
 const contentController = new PageController(contentComponent, sortComponent, moviesModel, apiWithProvider);
 
-
-render(header, new RankComponent(), PositionElement.BEFOREEND);
-render(footerStatistics, new AmountMoviesComponent(), PositionElement.BEFOREEND);
-
-
 apiWithProvider.getMovies()
   .then((cards) => {
+    render(footerStatistics, new AmountMoviesComponent(cards), PositionElement.BEFOREEND);
     moviesModel.setMovies(cards);
     contentController.render();
   });
 
-
+render(header, new RankComponent({movies: moviesModel}), PositionElement.BEFOREEND);
 filterController.render();
 render(main, statisticsComponent, PositionElement.BEFOREEND);
 statisticsComponent.hide();

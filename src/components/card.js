@@ -3,6 +3,8 @@ import MovieController from '../controllers/movie-controller';
 import {getTimeFromMins} from '../utils/changer';
 import moment from 'moment';
 
+const MAX_SIMBOLS = 140;
+
 const createMovieTamplate = (card) => {
 
   const {title, poster, genre, rating, time, description, comments, releaseDate, activedWatchlist, activedWatched, activedFavorite, altTitle} = card;
@@ -10,6 +12,7 @@ const createMovieTamplate = (card) => {
   const choosedWatchlist = activedWatchlist ? `film-card__controls-item--active` : ``;
   const choosedWatched = activedWatched ? `film-card__controls-item--active` : ``;
   const choosedFavorite = activedFavorite ? `film-card__controls-item--active` : ``;
+  const slicedDescription = description.length >= MAX_SIMBOLS ? `${description.substring(0, MAX_SIMBOLS)}...` : description;
 
   return (
     `<article class="film-card">
@@ -21,7 +24,7 @@ const createMovieTamplate = (card) => {
         <span class="film-card__genre">${genre}</span>
       </p>
       <img src="${poster}" alt="${altTitle}" class="film-card__poster">
-      <p class="film-card__description">${description}</p>
+      <p class="film-card__description">${slicedDescription}</p>
       <a class="film-card__comments">${comments.length} comments</a>
       <form class="film-card__controls">
         <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${choosedWatchlist}">Add to watchlist</button>

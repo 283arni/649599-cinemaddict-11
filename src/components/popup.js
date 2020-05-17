@@ -50,8 +50,8 @@ const createCommentTemplate = (review) => {
 };
 
 const createItemInfo = (informations) => {
-
   let [first, second] = informations;
+
   if (first === `releaseDate`) {
     first = `release date`;
     second = moment(second).format(`DD MMMM YYYY`);
@@ -67,7 +67,7 @@ const createItemInfo = (informations) => {
       </tr>`
       :
       `<tr class="film-details__row">
-        <td class="film-details__term">${firstUpper}</td>
+        <td class="film-details__term">${second.length > 1 ? `Genres` : `Genre`}</td>
         <td class="film-details__cell">
           <span class="film-details__genre">${second}</span>
         </td>
@@ -95,6 +95,8 @@ const createPopupDetailsTemplate = (card, options = {}) => {
   delete cloneCard.activedFavorite;
   delete cloneCard.emoji;
   delete cloneCard.age;
+  delete cloneCard.watching
+  ;
 
   const arrCard = Object.entries(cloneCard);
   const info = arrCard.map((item) => createItemInfo(item)).join(`\n`);
@@ -208,13 +210,14 @@ export default class Popup extends AbstractSmartComponent {
     this._api = api;
     this._closeHandler = null;
     this.watchedHandler = null;
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
     return createPopupDetailsTemplate(this._card, {
-      activedWatchlist: this.activedWatchlist,
-      activedWatched: this.activedWatched,
-      activedFavorite: this.activedFavorite,
+      activedWatchlist: this._card.activedWatchlist,
+      activedWatched: this._card.activedWatched,
+      activedFavorite: this._card.activedFavorite,
       emotion: this.emotion
     });
   }
@@ -226,6 +229,7 @@ export default class Popup extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
+    this._subscribeOnEvents();
   }
 
   _subscribeOnEvents() {
@@ -233,23 +237,17 @@ export default class Popup extends AbstractSmartComponent {
 
     element.querySelector(`.film-details__control-label--watchlist`)
       .addEventListener(`click`, () => {
-        this.activedWatchlist = !this.activedWatchlist;
-
-        this.rerender();
+        this._card.activedWatchlist = !this._card.activedWatchlist;
       });
 
     element.querySelector(`.film-details__control-label--watched`)
       .addEventListener(`click`, () => {
-        this.activedWatched = !this.activedWatched;
-
-        this.rerender();
+        this._card.activedWatched = !this._card.activedWatched;
       });
 
     element.querySelector(`.film-details__control-label--favorite`)
       .addEventListener(`click`, () => {
-        this.activedFavorite = !this.activedFavorite;
-
-        this.rerender();
+        this._card.activedFavorite = !this._card.activedFavorite;
       });
 
     const emojies = element.querySelectorAll(`.film-details__emoji-label`);

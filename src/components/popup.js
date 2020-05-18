@@ -26,7 +26,6 @@ const filterComments = (comments, id) => {
   return comments.filter((comment) => comment.id !== id);
 };
 
-
 const createCommentTemplate = (review) => {
   const {id, emotion, author, comment, date} = review;
 
@@ -210,7 +209,7 @@ export default class Popup extends AbstractSmartComponent {
     this._api = api;
     this._closeHandler = null;
     this.watchedHandler = null;
-    this._subscribeOnEvents();
+
   }
 
   getTemplate() {
@@ -223,36 +222,88 @@ export default class Popup extends AbstractSmartComponent {
   }
 
   recoveryListeners() {
-    this._subscribeOnEvents();
     this.closePopup(this._closeHandler);
   }
 
   rerender() {
     super.rerender();
-    this._subscribeOnEvents();
+    this.sendFormComment();
+    this.deleteCommentFromPopup();
+    this.closePopup(this._closeHandler);
   }
 
-  _subscribeOnEvents() {
+  setClickButtonWatchlist(handler) {
+    this.getElement().querySelector(`.film-details__control-label--watchlist`)
+    .addEventListener(`click`, handler);
+
+  }
+
+  setClickButtonWatched(handler) {
+    this.getElement().querySelector(`.film-details__control-label--watched`)
+    .addEventListener(`click`, handler);
+
+  }
+
+  setClickButtonFavorite(handler) {
+    this.getElement().querySelector(`.film-details__control-label--favorite`)
+    .addEventListener(`click`, handler);
+
+  }
+
+  closePopup(handler) {
+    this.getElement().querySelector(`.film-details__close-btn`)
+      .addEventListener(`click`, handler);
+
+    this._closeHandler = handler;
+  }
+
+  shake(container, area) {
+    if (area) {
+      area.style.border = `2px solid red`;
+      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
+    } else {
+      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
+    }
+
+    setTimeout(() => {
+      container.style.animation = ``;
+    }, TIME_ANIMATION);
+  }
+
+  deleteCommentFromPopup() {
+
+    const reviews = this.getElement().querySelectorAll(`.film-details__comment`);
+
+    reviews.forEach((review) => {
+      const btnDelete = review.querySelector(`.film-details__comment-delete`);
+      btnDelete.addEventListener(`click`, (e) => {
+        e.preventDefault();
+
+        btnDelete.setAttribute(`disabled`, true);
+        btnDelete.textContent = `Deleting...`;
+
+        this._api.deleteComment(review.id)
+          .then(() => {
+            this._card.comments = filterComments(this._card.comments, review.id);
+
+            review.remove();
+            this.rerender();
+          })
+          .catch(() => {
+            btnDelete.disabled = false;
+            btnDelete.textContent = `Delete`;
+
+            this.shake(review);
+          });
+      });
+    });
+  }
+
+  sendFormComment() {
     const element = this.getElement();
-
-    element.querySelector(`.film-details__control-label--watchlist`)
-      .addEventListener(`click`, () => {
-        this._card.activedWatchlist = !this._card.activedWatchlist;
-      });
-
-    element.querySelector(`.film-details__control-label--watched`)
-      .addEventListener(`click`, () => {
-        this._card.activedWatched = !this._card.activedWatched;
-      });
-
-    element.querySelector(`.film-details__control-label--favorite`)
-      .addEventListener(`click`, () => {
-        this._card.activedFavorite = !this._card.activedFavorite;
-      });
-
     const emojies = element.querySelectorAll(`.film-details__emoji-label`);
     const emojiDiv = element.querySelector(`.film-details__add-emoji-label`);
-    const elemNewComment = this.getElement().querySelector(`.film-details__new-comment`);
+    const elemNewComment = element.querySelector(`.film-details__new-comment`);
     const textarea = element.querySelector(`textarea`);
 
 
@@ -292,69 +343,24 @@ export default class Popup extends AbstractSmartComponent {
     textarea.addEventListener(`input`, (evt) => {
       newComment.comment = evt.target.value;
     });
-
-    const reviews = element.querySelectorAll(`.film-details__comment`);
-
-    reviews.forEach((review) => {
-      const btnDelete = review.querySelector(`.film-details__comment-delete`);
-      btnDelete.addEventListener(`click`, (e) => {
-        e.preventDefault();
-
-        btnDelete.setAttribute(`disabled`, true);
-        btnDelete.textContent = `Deleting...`;
-
-        this._api.deleteComment(review.id)
-          .then(() => {
-            filterComments(this._card.comments, review.id);
-
-            review.remove();
-          })
-          .catch(() => {
-            btnDelete.disabled = false;
-            btnDelete.textContent = `Delete`;
-
-            this.shake(review);
-          });
-      });
-    });
-  }
-
-  shake(container, area) {
-    if (area) {
-      area.style.border = `2px solid red`;
-      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
-    } else {
-      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
-    }
-
-    setTimeout(() => {
-      container.style.animation = ``;
-    }, TIME_ANIMATION);
-  }
-
-  closePopup(handler) {
-    this.getElement().querySelector(`.film-details__close-btn`)
-      .addEventListener(`click`, handler);
-
-    this._closeHandler = handler;
   }
 
   runOnKeys(elem, addComment) {
-    const arr = new Set();
+    const keysPressed = new Set();
 
     elem.addEventListener(`keydown`, (event) => {
-      arr.delete(event.key);
+      keysPressed.delete(event.key);
       if (event.key === Key.CONTROL || event.key === Key.CMD) {
-        arr.add(event.key);
+        keysPressed.add(event.key);
       }
     });
 
     elem.addEventListener(`keyup`, (event) => {
-      arr.delete(event.key);
+      keysPressed.delete(event.key);
       if (event.key === Key.ENTER) {
-        arr.add(event.key);
+        keysPressed.add(event.key);
 
-        if (arr.size < PRESS_KEYS) {
+        if (keysPressed.size < PRESS_KEYS) {
           return;
         }
 

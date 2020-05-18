@@ -6,6 +6,7 @@ import MovieController from '../controllers/movie-controller';
 import {SortType} from '../components/sort';
 import NoMoviesComponent from '../components/no-movies';
 import LoadingMovies from '../components/loading-movie';
+import RankComponent from '../components/rank';
 import {remove, replaceTitle, PositionElement, render} from '../utils/render';
 
 const Quantity = {
@@ -15,9 +16,9 @@ const Quantity = {
 };
 
 const main = document.querySelector(`.main`);
+const header = document.querySelector(`.header`);
 
-const renderCardsInContainer = (component, movies, onDataChange, onViewChange, api, inContainer = false) => {
-
+const renderCardsInContainer = (component, movies, onDataChange, onViewChange, api, inContainer = false, rankComponent) => {
   let container = null;
   let elementContainer = null;
   // Проверка куда рендерить
@@ -31,7 +32,7 @@ const renderCardsInContainer = (component, movies, onDataChange, onViewChange, a
   }
 
   return movies.map((movie) => {
-    const movieController = new MovieController(elementContainer, onDataChange, onViewChange, api);
+    const movieController = new MovieController(elementContainer, onDataChange, onViewChange, api, rankComponent);
     movieController.render(movie);
 
     return movieController;
@@ -75,6 +76,7 @@ export default class PageController {
     this._listTopComponent = new ListTopComponent(this._moviesModel.getMoviesAll());
     this._listMostComponent = new ListMostComponent(this._moviesModel.getMoviesAll());
     this._noMoviesComponent = new NoMoviesComponent();
+    this._rankComponent = new RankComponent({movies: this._moviesModel});
     this._sortComponent = sortComponent;
     this._loadingMovies = new LoadingMovies();
 
@@ -111,13 +113,14 @@ export default class PageController {
       return;
     }
 
-    const newCards = renderCardsInContainer(moveisList, movies.slice(0, Quantity.RENDER_MOVIES), this._onDataChange, this._onViewChange, this._api);
+    const newCards = renderCardsInContainer(moveisList, movies.slice(0, Quantity.RENDER_MOVIES), this._onDataChange, this._onViewChange, this._api, false);
     this._showedMoviesControllers = this._showedMoviesControllers.concat(newCards);
 
     this._renderButtonMore();
 
     render(this._container.getElement(), this._listTopComponent, PositionElement.BEFOREEND);
     render(this._container.getElement(), this._listMostComponent, PositionElement.BEFOREEND);
+    render(header, this._rankComponent, PositionElement.BEFOREEND);
 
     const listsExtra = this._container.getElement().querySelectorAll(`.films-list--extra`);
 
@@ -127,7 +130,7 @@ export default class PageController {
       if (elem.classList.contains(`films-list--extra-top`)) {
         sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.RATING, 0, this.showingCardsCount);
       }
-      renderCardsInContainer(elem, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
+      renderCardsInContainer(elem, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api, false);
     });
   }
 
@@ -167,6 +170,7 @@ export default class PageController {
 
     this._removeMovies();
     this._renderMovies(movies.slice(0, count));
+    this._rankComponent.rerender();
 
     if (movies.length <= this.showingCardsCount) {
       remove(this._buttonMoreComponent);

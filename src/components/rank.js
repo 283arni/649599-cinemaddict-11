@@ -2,10 +2,9 @@ import AbstractSmartComponent from './abstract-smart-component';
 import {getRankUser, watchedMovies} from '../utils/changer';
 
 const createRankTemplate = (cards) => {
-  console.log(cards)
+
   const watched = watchedMovies(cards);
   const userRank = getRankUser(watched.length);
-
 
   return (
     `<section class="header__profile profile">
@@ -20,7 +19,6 @@ export default class Rank extends AbstractSmartComponent {
     super();
 
     this._cards = movies;
-    this.click();
   }
 
   recoveryListeners() {}
@@ -31,12 +29,5 @@ export default class Rank extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
-    this.click();
-  }
-
-  click() {
-    this.getElement().addEventListener(`click`, () => {
-      this.rerender()
-    });
   }
 }

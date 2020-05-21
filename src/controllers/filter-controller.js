@@ -1,12 +1,15 @@
 import FilterComponent from "../components/nav";
-import {NavItem} from "../mock/nav";
+import {NavItem, STATS} from "../consts";
 import {render, replace, PositionElement} from "../utils/render.js";
 import {getMoviesByFilter} from "../utils/filter.js";
 
 export default class FilterController {
-  constructor(container, moviesModel) {
+  constructor(container, moviesModel, sortComponent, statisticComponent, contentComponent) {
     this._container = container;
     this._moviesModel = moviesModel;
+    this._statisticComponent = statisticComponent;
+    this._contentComponent = contentComponent;
+    this._sortComponent = sortComponent;
 
     this._activeFilterType = NavItem.ALL;
     this._filterComponent = null;
@@ -20,16 +23,17 @@ export default class FilterController {
   render() {
     const container = this._container;
     const allTasks = this._moviesModel.getMoviesAll();
-    const filters = Object.values(NavItem).map((filterType) => {
+    const oldComponent = this._filterComponent;
 
+
+    const filters = Object.values(NavItem).map((filterType) => {
       return {
         name: filterType,
         count: getMoviesByFilter(allTasks, filterType).length,
       };
     });
-    const oldComponent = this._filterComponent;
 
-    this._filterComponent = new FilterComponent(filters);
+    this._filterComponent = new FilterComponent(filters, this._activeFilterType);
     this._filterComponent.setFilterChangeHandler(this._onFilterChange);
 
     if (oldComponent) {
@@ -42,6 +46,19 @@ export default class FilterController {
   _onFilterChange(filterType) {
     this._moviesModel.setFilter(filterType);
     this._activeFilterType = filterType;
+
+    switch (filterType) {
+      case STATS:
+        this._statisticComponent.show();
+        this._contentComponent.hide();
+        this._sortComponent.hide();
+        break;
+      case filterType:
+        this._statisticComponent.hide();
+        this._contentComponent.show();
+        this._sortComponent.show();
+        break;
+    }
   }
 
   _onDataChange() {

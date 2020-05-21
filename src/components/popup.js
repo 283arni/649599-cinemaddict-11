@@ -1,7 +1,7 @@
-
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import {encode} from "he";
 import {getTimeFromMins} from '../utils/changer';
+import {Key, StyleBorder} from '../consts';
 import moment from 'moment';
 
 const CAPITAL_LITTER = 0;
@@ -10,15 +10,9 @@ const PRESS_KEYS = 2;
 const TIME_ANIMATION = 600;
 const MILLISECONDS = 1000;
 
-const Key = {
-  ENTER: `Enter`,
-  CONTROL: `Control`,
-  CMD: `Command`
-};
-
 const newComment = {
-  emotion: `sleeping`,
-  comment: `Booooooooooring`,
+  emotion: ``,
+  comment: ``,
   date: `${new Date()}`
 };
 
@@ -26,9 +20,9 @@ const filterComments = (comments, id) => {
   return comments.filter((comment) => comment.id !== id);
 };
 
-
 const createCommentTemplate = (review) => {
   const {id, emotion, author, comment, date} = review;
+
   const filtredText = encode(comment);
 
   return (
@@ -49,8 +43,8 @@ const createCommentTemplate = (review) => {
 };
 
 const createItemInfo = (informations) => {
-
   let [first, second] = informations;
+
   if (first === `releaseDate`) {
     first = `release date`;
     second = moment(second).format(`DD MMMM YYYY`);
@@ -66,7 +60,7 @@ const createItemInfo = (informations) => {
       </tr>`
       :
       `<tr class="film-details__row">
-        <td class="film-details__term">${firstUpper}</td>
+        <td class="film-details__term">${second.length > 1 ? `Genres` : `Genre`}</td>
         <td class="film-details__cell">
           <span class="film-details__genre">${second}</span>
         </td>
@@ -75,7 +69,7 @@ const createItemInfo = (informations) => {
 };
 
 const createPopupDetailsTemplate = (card, options = {}) => {
-  const {title, poster, rating, description, comments} = card;
+  const {title, poster, rating, description, comments, age, altTitle} = card;
 
   const discussion = comments.map((comment) => {
     return createCommentTemplate(comment);
@@ -86,13 +80,15 @@ const createPopupDetailsTemplate = (card, options = {}) => {
   delete cloneCard.title;
   delete cloneCard.poster;
   delete cloneCard.rating;
-  delete cloneCard.rating;
   delete cloneCard.comments;
   delete cloneCard.description;
   delete cloneCard.activedWatchlist;
   delete cloneCard.activedWatched;
   delete cloneCard.activedFavorite;
   delete cloneCard.emoji;
+  delete cloneCard.age;
+  delete cloneCard.watching;
+  delete cloneCard.altTitle;
 
   const arrCard = Object.entries(cloneCard);
   const info = arrCard.map((item) => createItemInfo(item)).join(`\n`);
@@ -103,6 +99,7 @@ const createPopupDetailsTemplate = (card, options = {}) => {
   const choosedWatchlist = activedWatchlist ? `checked` : ``;
   const choosedWatched = activedWatched ? `checked` : ``;
   const choosedFavorite = activedFavorite ? `checked` : ``;
+  const setAge = age ? `${age}+` : age;
 
   return (
     `<section class="film-details">
@@ -113,9 +110,9 @@ const createPopupDetailsTemplate = (card, options = {}) => {
           </div>
           <div class="film-details__info-wrap">
             <div class="film-details__poster">
-              <img class="film-details__poster-img" src="${poster}" alt="">
+              <img class="film-details__poster-img" src="${poster}" alt="${altTitle}">
 
-              <p class="film-details__age">18+</p>
+              <p class="film-details__age">${setAge}</p>
             </div>
 
             <div class="film-details__info">
@@ -200,58 +197,94 @@ export default class Popup extends AbstractSmartComponent {
   constructor(card, api) {
     super();
 
-    this._newComment = null;
     this._card = card;
     this._api = api;
-    this._closeHandler = null;
-    this.watchedHandler = null;
   }
 
   getTemplate() {
     return createPopupDetailsTemplate(this._card, {
-      activedWatchlist: this.activedWatchlist,
-      activedWatched: this.activedWatched,
-      activedFavorite: this.activedFavorite,
+      activedWatchlist: this._card.activedWatchlist,
+      activedWatched: this._card.activedWatched,
+      activedFavorite: this._card.activedFavorite,
       emotion: this.emotion
     });
   }
 
-  recoveryListeners() {
-    this._subscribeOnEvents();
-    this.closePopup(this._closeHandler);
-  }
+  recoveryListeners() {}
 
   rerender() {
     super.rerender();
   }
 
-  _subscribeOnEvents() {
+  setClickButtonWatchlist(handler) {
+    this.getElement().querySelector(`.film-details__control-label--watchlist`)
+    .addEventListener(`click`, handler);
+
+  }
+
+  setClickButtonWatched(handler) {
+    this.getElement().querySelector(`.film-details__control-label--watched`)
+    .addEventListener(`click`, handler);
+
+  }
+
+  setClickButtonFavorite(handler) {
+    this.getElement().querySelector(`.film-details__control-label--favorite`)
+    .addEventListener(`click`, handler);
+
+  }
+
+  closePopup(handler) {
+    this.getElement().querySelector(`.film-details__close-btn`)
+      .addEventListener(`click`, handler);
+  }
+
+  shake(container, area) {
+    if (area) {
+      area.style.border = StyleBorder.ERROR;
+      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
+    } else {
+      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
+    }
+
+    setTimeout(() => {
+      container.style.animation = ``;
+    }, TIME_ANIMATION);
+  }
+
+  deleteCommentFromPopup(newMovie) {
+    const reviews = this.getElement().querySelectorAll(`.film-details__comment`);
+    const countComments = this.getElement().querySelector(`.film-details__comments-count`);
+
+    reviews.forEach((review) => {
+      const btnDelete = review.querySelector(`.film-details__comment-delete`);
+      btnDelete.addEventListener(`click`, (e) => {
+        e.preventDefault();
+
+        btnDelete.setAttribute(`disabled`, true);
+        btnDelete.textContent = `Deleting...`;
+
+        this._api.deleteComment(review.id)
+          .then(() => {
+            newMovie.comments = filterComments(newMovie.comments, review.id);
+            review.remove();
+            countComments.textContent = newMovie.comments.length;
+          })
+          .catch(() => {
+            btnDelete.disabled = false;
+            btnDelete.textContent = `Delete`;
+
+            this.shake(review);
+          });
+      });
+    });
+  }
+
+  sendFormComment() {
     const element = this.getElement();
-
-    element.querySelector(`.film-details__control-label--watchlist`)
-      .addEventListener(`click`, () => {
-        this.activedWatchlist = !this.activedWatchlist;
-
-        this.rerender();
-      });
-
-    element.querySelector(`.film-details__control-label--watched`)
-      .addEventListener(`click`, () => {
-        this.activedWatched = !this.activedWatched;
-
-        this.rerender();
-      });
-
-    element.querySelector(`.film-details__control-label--favorite`)
-      .addEventListener(`click`, () => {
-        this.activedFavorite = !this.activedFavorite;
-
-        this.rerender();
-      });
-
     const emojies = element.querySelectorAll(`.film-details__emoji-label`);
     const emojiDiv = element.querySelector(`.film-details__add-emoji-label`);
-    const elemNewComment = this.getElement().querySelector(`.film-details__new-comment`);
+    const elemNewComment = element.querySelector(`.film-details__new-comment`);
     const textarea = element.querySelector(`textarea`);
 
 
@@ -273,12 +306,13 @@ export default class Popup extends AbstractSmartComponent {
     this.runOnKeys(textarea, () => {
       this.emoji = null;
 
-      textarea.style.border = `solid 1px #979797`;
+      textarea.style.border = StyleBorder.DEFAULT;
       textarea.setAttribute(`disabled`, true);
 
       this._api.createComment(this._card.id, newComment)
         .then((movie) => {
           this._card = movie;
+
           this.rerender();
         })
         .catch(() => {
@@ -291,70 +325,24 @@ export default class Popup extends AbstractSmartComponent {
     textarea.addEventListener(`input`, (evt) => {
       newComment.comment = evt.target.value;
     });
-
-    const reviews = element.querySelectorAll(`.film-details__comment`);
-
-    reviews.forEach((review) => {
-      const btnDelete = review.querySelector(`.film-details__comment-delete`);
-      btnDelete.addEventListener(`click`, (e) => {
-        e.preventDefault();
-
-        btnDelete.setAttribute(`disabled`, true);
-        btnDelete.textContent = `Deleting...`;
-
-        this._api.deleteComment(review.id)
-          .then(() => {
-            filterComments(this._card.comments, review.id);
-
-            review.remove();
-          })
-          .catch(() => {
-            btnDelete.disabled = false;
-            btnDelete.textContent = `Delete`;
-
-            this.shake(review);
-          });
-      });
-    });
-  }
-
-  shake(container, area) {
-
-    if (area) {
-      area.style.border = `2px solid red`;
-      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
-    } else {
-      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
-    }
-
-    setTimeout(() => {
-      container.style.animation = ``;
-    }, TIME_ANIMATION);
-  }
-
-  closePopup(handler) {
-    this.getElement().querySelector(`.film-details__close-btn`)
-      .addEventListener(`click`, handler);
-
-    this._closeHandler = handler;
   }
 
   runOnKeys(elem, addComment) {
-    const arr = new Set();
+    const keysPressed = new Set();
 
     elem.addEventListener(`keydown`, (event) => {
-      arr.delete(event.key);
+      keysPressed.delete(event.key);
       if (event.key === Key.CONTROL || event.key === Key.CMD) {
-        arr.add(event.key);
+        keysPressed.add(event.key);
       }
     });
 
     elem.addEventListener(`keyup`, (event) => {
-      arr.delete(event.key);
+      keysPressed.delete(event.key);
       if (event.key === Key.ENTER) {
-        arr.add(event.key);
+        keysPressed.add(event.key);
 
-        if (arr.size < PRESS_KEYS) {
+        if (keysPressed.size < PRESS_KEYS) {
           return;
         }
 

@@ -1,15 +1,16 @@
 import AbstractComponent from './abstract-component';
-import MovieController from '../controllers/movie-controller';
 import {getTimeFromMins} from '../utils/changer';
 import moment from 'moment';
 
-const createMovieTamplate = (card) => {
+const MAX_SIMBOLS = 140;
 
-  const {title, poster, genre, rating, time, description, comments, releaseDate, activedWatchlist, activedWatched, activedFavorite} = card;
+const createMovieTamplate = (card) => {
+  const {title, poster, genre, rating, time, description, comments, releaseDate, activedWatchlist, activedWatched, activedFavorite, altTitle} = card;
 
   const choosedWatchlist = activedWatchlist ? `film-card__controls-item--active` : ``;
   const choosedWatched = activedWatched ? `film-card__controls-item--active` : ``;
   const choosedFavorite = activedFavorite ? `film-card__controls-item--active` : ``;
+  const slicedDescription = description.length >= MAX_SIMBOLS ? `${description.substring(0, MAX_SIMBOLS)}...` : description;
 
   return (
     `<article class="film-card">
@@ -18,10 +19,10 @@ const createMovieTamplate = (card) => {
       <p class="film-card__info">
         <span class="film-card__year">${moment(releaseDate).format(`YYYY`)}</span>
         <span class="film-card__duration">${getTimeFromMins(time)}</span>
-        <span class="film-card__genre">${genre}</span>
+        <span class="film-card__genre">${genre.join(`, `)}</span>
       </p>
-      <img src="${poster}" alt="${title}" class="film-card__poster">
-      <p class="film-card__description">${description}</p>
+      <img src="${poster}" alt="${altTitle}" class="film-card__poster">
+      <p class="film-card__description">${slicedDescription}</p>
       <a class="film-card__comments">${comments.length} comments</a>
       <form class="film-card__controls">
         <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${choosedWatchlist}">Add to watchlist</button>
@@ -37,26 +38,26 @@ export default class Card extends AbstractComponent {
     super();
 
     this._card = card;
-    this._movieController = new MovieController();
-    this._submitHandler = null;
   }
 
   getTemplate() {
     return createMovieTamplate(this._card);
   }
 
-  setClickElementCard(popup, onViewChange) {
-    this.getElement().addEventListener(`click`, (e) => {
-      const titleMovies = this.getElement().querySelector(`.film-card__title`);
-      const posterMovies = this.getElement().querySelector(`.film-card__poster`);
-      const commentMovies = this.getElement().querySelector(`.film-card__comments`);
-
-      if (e.target === titleMovies || e.target === posterMovies || e.target === commentMovies) {
-        this._movieController.openPopup(popup, onViewChange);
-      }
-    });
+  setClickPoster(handler) {
+    this.getElement().querySelector(`.film-card__poster`)
+    .addEventListener(`click`, handler);
   }
 
+  setClickTitle(handler) {
+    this.getElement().querySelector(`.film-card__title`)
+    .addEventListener(`click`, handler);
+  }
+
+  setClickComments(handler) {
+    this.getElement().querySelector(`.film-card__comments`)
+    .addEventListener(`click`, handler);
+  }
 
   setWatchlistClickHandler(handler) {
     this.getElement().querySelector(`.film-card__controls-item--add-to-watchlist`)
@@ -72,5 +73,4 @@ export default class Card extends AbstractComponent {
     this.getElement().querySelector(`.film-card__controls-item--favorite`)
     .addEventListener(`click`, handler);
   }
-
 }

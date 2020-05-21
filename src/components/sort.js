@@ -4,6 +4,7 @@ export const SortType = {
   RATING: `rating`,
   DATE: `date`,
   DEFAULT: `default`,
+  COMMENTS: `comments`
 };
 
 const createSortTamplate = () => {
@@ -36,6 +37,10 @@ export default class Sort extends AbstractComponent {
     return this._currenSortType;
   }
 
+  setSortType(type) {
+    this._currenSortType = type;
+  }
+
   setSortTypeChangeHandler(handler) {
     this.getElement().addEventListener(`click`, (evt) => {
       evt.preventDefault();
@@ -43,7 +48,6 @@ export default class Sort extends AbstractComponent {
       if (evt.target.tagName !== `A`) {
         return;
       }
-
       removeClassSort(this.getElement());
 
       const sortType = evt.target.dataset.sort;

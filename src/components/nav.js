@@ -1,7 +1,7 @@
 import AbstractComponent from './abstract-component';
 
 const setActiveClass = function (evt, element) {
-  const filtersList = element.querySelectorAll(`.main-navigation__item`);
+  const filtersList = element.querySelectorAll(`a`);
 
   filtersList.forEach((filter) => {
     filter.classList.remove(`main-navigation__item--active`);
@@ -10,41 +10,40 @@ const setActiveClass = function (evt, element) {
   evt.target.classList.add(`main-navigation__item--active`);
 };
 
-const creatNavItemTemplate = (tab) => {
-
+const creatNavItemTemplate = (tab, filter) => {
   const {name, count} = tab;
-  const updateName = name.split(` `)[0];
 
-  const activeClass = updateName === `All` ? `main-navigation__item--active` : ``;
-  const insertCount = updateName !== `All` ? `<span class="main-navigation__item-count">${count}</span>` : ``;
+  const insertCount = name !== `All movies` ? `<span class="main-navigation__item-count">${count}</span>` : ``;
+  const activeFilter = filter === name ? `main-navigation__item--active` : ``;
 
   return (
-    `<a href="#${updateName}" data-name="${updateName}" class="main-navigation__item  ${activeClass}">${name} ${insertCount}</a>`
+    `<a href="#${name}" data-name="${name}" class="main-navigation__item ${activeFilter}">${name} ${insertCount}</a>`
   );
 };
 
-const createStatisticTamplate = (array) => {
-  const menuItems = array.map((item) => creatNavItemTemplate(item)).join(`\n`);
+const createStatisticTamplate = (array, filter) => {
+  const menuItems = array.map((item) => creatNavItemTemplate(item, filter)).join(`\n`);
 
   return (
     `<nav class="main-navigation">
       <div class="main-navigation__items">
         ${menuItems}
       </div>
-      <a href="#stats" class="main-navigation__additional">Stats</a>
+      <a href="#Stats" data-name="Stats" class="main-navigation__additional">Stats</a>
     </nav>`
   );
 };
 
 export default class Navigation extends AbstractComponent {
-  constructor(navItem) {
+  constructor(navItems, activeFilter) {
     super();
 
-    this._nav = navItem;
+    this._navs = navItems;
+    this._activeFilter = activeFilter;
   }
 
   getTemplate() {
-    return createStatisticTamplate(this._nav);
+    return createStatisticTamplate(this._navs, this._activeFilter);
   }
 
   setFilterChangeHandler(handler) {

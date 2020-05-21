@@ -3,21 +3,17 @@ import ListTopComponent from '../components/list-top';
 import ListMostComponent from '../components/list-most';
 import ContainerComponent from '../components/container';
 import MovieController from '../controllers/movie-controller';
-import SortComponent, {SortType} from '../components/sort';
+import {SortType} from '../components/sort';
 import NoMoviesComponent from '../components/no-movies';
-import LoadingMovies from '../components/loading-movie';
+import RankComponent from '../components/rank';
 import {remove, replaceTitle, PositionElement, render} from '../utils/render';
+import {Quantity} from '../consts';
 
-const Quantity = {
-  RENDER_MOVIES: 5,
-  RENDER_MOVIES_IF_CLICK_BUTTON: 5,
-  MOVIES_EXTRA: 2,
-};
 
 const main = document.querySelector(`.main`);
+const header = document.querySelector(`.header`);
 
 const renderCardsInContainer = (component, movies, onDataChange, onViewChange, api, inContainer = false) => {
-
   let container = null;
   let elementContainer = null;
   // Проверка куда рендерить
@@ -49,6 +45,9 @@ const getSortedCards = (tasks, sortType, from, to) => {
     case SortType.DATE:
       sortedCards = showingTasks.sort((a, b) => b.releaseDate.substring(0, 4) - a.releaseDate.substring(0, 4));
       break;
+    case SortType.COMMENTS:
+      sortedCards = showingTasks.sort((a, b) => b.comments.length - a.comments.length);
+      break;
     case SortType.DEFAULT:
       sortedCards = showingTasks;
       break;
@@ -59,7 +58,7 @@ const getSortedCards = (tasks, sortType, from, to) => {
 
 
 export default class PageController {
-  constructor(container, moviesModel, api) {
+  constructor(container, sortComponent, moviesModel, api) {
     this._container = container;
     this._moviesModel = moviesModel;
     this._api = api;
@@ -72,8 +71,8 @@ export default class PageController {
     this._listTopComponent = new ListTopComponent();
     this._listMostComponent = new ListMostComponent();
     this._noMoviesComponent = new NoMoviesComponent();
-    this._sortComponent = new SortComponent();
-    this._loadingMovies = new LoadingMovies();
+    this._rankComponent = new RankComponent({movies: this._moviesModel});
+    this._sortComponent = sortComponent;
 
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
@@ -87,13 +86,21 @@ export default class PageController {
 
   }
 
+  hide() {
+    this._container.hide();
+  }
+
+  show() {
+    this._container.show();
+  }
+
   render() {
-    const movies = this._moviesModel.getMovies();
-
-    render(main, this._sortComponent, PositionElement.BEFOREEND);
     render(main, this._container, PositionElement.BEFOREEND);
+    render(header, this._rankComponent, PositionElement.BEFOREEND);
 
-    const moveisList = this._container.getElement().querySelector(`.films-list`);
+    const movies = this._moviesModel.getMovies();
+    const container = this._container.getElement();
+    const moveisList = container.querySelector(`.films-list`);
 
     if (!movies.length) {
       replaceTitle(this._noMoviesComponent, this._container);
@@ -105,15 +112,30 @@ export default class PageController {
 
     this._renderButtonMore();
 
-    render(this._container.getElement(), this._listTopComponent, PositionElement.BEFOREEND);
-    render(this._container.getElement(), this._listMostComponent, PositionElement.BEFOREEND);
+    if (!this._ifAllMoviesRatingZero(movies)) {
+      render(container, this._listTopComponent, PositionElement.BEFOREEND);
+      this._renderTopRated();
+    }
 
-    const listsExtra = this._container.getElement().querySelectorAll(`.films-list--extra`);
+    if (!this._ifAllMoviesNonComments(movies)) {
+      render(container, this._listMostComponent, PositionElement.BEFOREEND);
+      this._renderMostComments();
+    }
+  }
 
-    listsExtra.forEach((elem) => {
-      const newCardsExtra = renderCardsInContainer(elem, movies.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
-      this._showedMoviesExtraControllers = this._showedMoviesExtraControllers.concat(newCardsExtra);
-    });
+  _renderTopRated() {
+    
+    const topRatedElement = document.querySelector(`.films-list--extra-top`);
+    const sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.RATING, 0, this.showingCardsCount);
+
+    renderCardsInContainer(topRatedElement, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
+  }
+
+  _renderMostComments() {
+    const mostCommentsElement = this._container.getElement().querySelector(`.films-list--extra-most`);
+    const sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.COMMENTS, 0, this.showingCardsCount);
+
+    renderCardsInContainer(mostCommentsElement, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
   }
 
   _sortMoviesRender(sortType) {
@@ -150,8 +172,12 @@ export default class PageController {
   _updateMovies(count) {
     const movies = this._moviesModel.getMovies();
 
+    this._sortComponent.setActiveSort(SortType.DEFAULT);
     this._removeMovies();
     this._renderMovies(movies.slice(0, count));
+    this._rankComponent.rerender();
+    this._listMostComponent.rerender();
+    this._renderMostComments();
 
     if (movies.length <= this.showingCardsCount) {
       remove(this._buttonMoreComponent);
@@ -161,15 +187,17 @@ export default class PageController {
   }
 
   _onDataChange(movieController, oldData, newData) {
-    this._api.updateMovie(oldData.id, newData)
-    .then((movieModel) => {
-      const isSuccess = this._moviesModel.updateMovie(oldData.id, movieModel);
+    if (oldData) {
+      this._api.updateMovie(oldData.id, newData)
+      .then((movieModel) => {
+        const isSuccess = this._moviesModel.updateMovie(oldData.id, movieModel);
 
-      if (isSuccess) {
-        movieController.render(movieModel);
-        this._updateMovies(this.showingCardsCount);
-      }
-    });
+        if (isSuccess) {
+          movieController.render(movieModel);
+          this._updateMovies(this.showingCardsCount);
+        }
+      });
+    }
   }
 
   _removeMovies() {
@@ -194,5 +222,13 @@ export default class PageController {
 
     this._updateMovies(this.showingCardsCount);
     this._sortComponent.setActiveSort(SortType.DEFAULT);
+  }
+
+  _ifAllMoviesNonComments(cards) {
+    return cards.every((card) => card.comments === []);
+  }
+
+  _ifAllMoviesRatingZero(cards) {
+    return cards.every((card) => card.rating === 0);
   }
 }

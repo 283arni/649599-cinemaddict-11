@@ -185,7 +185,7 @@ export default class Statistic extends AbstractSmartComponent {
   }
 
   _renderChart(cards = this._cards.getMoviesAll()) {
-    let newCards = watchedMovies(cards);
+    const newCards = watchedMovies(cards);
     const height = getAllGenres(newCards).size;
 
     const element = this.getElement();

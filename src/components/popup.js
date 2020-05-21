@@ -199,6 +199,11 @@ export default class Popup extends AbstractSmartComponent {
 
     this._card = card;
     this._api = api;
+
+    this._closeHandler = null;
+    this._watchlistHandler = null;
+    this._watchedHandler = null;
+    this._favoriteHandler = null;
   }
 
   getTemplate() {
@@ -214,29 +219,40 @@ export default class Popup extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
+    this.sendFormComment();
+    this.closePopup(this._closeHandler);
+    this.deleteCommentFromPopup(this._card);
+    this.setClickButtonWatchlist(this._watchlistHandler);
+    this.setClickButtonWatched(this._watchedHandler);
+    this.setClickButtonFavorite(this._favoriteHandler);
   }
 
   setClickButtonWatchlist(handler) {
     this.getElement().querySelector(`.film-details__control-label--watchlist`)
     .addEventListener(`click`, handler);
 
+    this._watchlistHandler = handler;
   }
 
   setClickButtonWatched(handler) {
     this.getElement().querySelector(`.film-details__control-label--watched`)
     .addEventListener(`click`, handler);
 
+    this._watchedHandler = handler;
   }
 
   setClickButtonFavorite(handler) {
     this.getElement().querySelector(`.film-details__control-label--favorite`)
     .addEventListener(`click`, handler);
 
+    this._favoriteHandler = handler;
   }
 
   closePopup(handler) {
     this.getElement().querySelector(`.film-details__close-btn`)
       .addEventListener(`click`, handler);
+
+    this._closeHandler = handler;
   }
 
   shake(container, area) {

@@ -1,4 +1,4 @@
-import {NavItem} from '../mock/nav';
+import {NavItem} from '../consts';
 
 const getWatchlistMovies = (movies) => {
   return movies.filter((movie) => movie.activedWatchlist);

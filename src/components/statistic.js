@@ -3,16 +3,10 @@ import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {getTimeFromMins, getRankUser, watchedMovies} from '../utils/changer';
 import moment from 'moment';
+import {intervalsWatching} from '../consts';
 
 const BAR_HEIGHT = 50;
-
-const interval = {
-  all: `all`,
-  today: `today`,
-  week: `weeks`,
-  month: `months`,
-  year: `years`
-};
+const ADD_REPEAT_GENRE = 1;
 
 const searchTopGenre = (object) => {
   let topGenre = ``;
@@ -32,7 +26,7 @@ const searchTopGenre = (object) => {
 const getAllGenres = (movies) => {
   const allGenres = new Map();
 
-  movies.map((movie) => movie.genre.map((type) => allGenres.has(type) ? allGenres.set(type, allGenres.get(type) + 1) : allGenres.set(type, 1)));
+  movies.map((movie) => movie.genre.map((type) => allGenres.has(type) ? allGenres.set(type, allGenres.get(type) + ADD_REPEAT_GENRE) : allGenres.set(type, ADD_REPEAT_GENRE)));
 
   return allGenres;
 };
@@ -135,11 +129,11 @@ const createStatisticsTamplate = (cards) => {
     <ul class="statistic__text-list">
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">You watched</h4>
-        <p class="statistic__item-text" data-name="watched"><span class="statistic__item-description">movies</span></p>
+        <p class="statistic__item-text" data-name="watched"></p>
       </li>
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">Total duration</h4>
-        <p class="statistic__item-text" data-name="time"><span class="statistic__item-description">h</span> <span class="statistic__item-description">m</span></p>
+        <p class="statistic__item-text" data-name="time"></p>
       </li>
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">Top genre</h4>
@@ -236,16 +230,16 @@ export default class Statistic extends AbstractSmartComponent {
         let newCards = null;
         const intervalTime = e.target.dataset.name;
         switch (intervalTime) {
-          case interval.all:
+          case intervalsWatching.all:
             newCards = this._cards.getMoviesAll();
             this._renderChart(newCards);
             break;
-          case interval.today:
-            newCards = this._cards.getMoviesAll().filter((card) => moment(new Date(card.watching)) === moment(new Date()));
+          case intervalsWatching.today:
+            newCards = this._cards.getMoviesAll().filter((card) => moment(new Date(card.watching)).format(`DD MM YYYY`) === moment(new Date()).format(`DD MM YYYY`));
             this._renderChart(newCards);
             break;
           case intervalTime:
-            newCards = this._cards.getMoviesAll().filter((card) => moment(new Date(card.watching)) >= moment(new Date()).subtract(1, interval[intervalTime]));
+            newCards = this._cards.getMoviesAll().filter((card) => moment(new Date(card.watching)) >= moment(new Date()).subtract(1, intervalsWatching[intervalTime]));
             this._renderChart(newCards);
             break;
         }

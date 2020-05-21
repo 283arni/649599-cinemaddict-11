@@ -2,9 +2,9 @@ import {remove, replace, PositionElement, render} from '../utils/render';
 import CardComponent from '../components/card';
 import PopupComponent from '../components/popup';
 import MovieModel from '../models/movie';
+import {Key} from '../consts';
 
 const body = document.querySelector(`body`);
-
 
 export default class MovieController {
   constructor(container, onDataChange, onViewChange, api) {
@@ -16,17 +16,16 @@ export default class MovieController {
     this._popupComponent = null;
     this._onViewChange = onViewChange;
     this._onDataChange = onDataChange;
-
   }
 
   render(card) {
     const oldCardComponent = this._cardComponent;
 
     this._cardComponent = new CardComponent(card);
-    this._popupComponent = new PopupComponent(card, this._api);
 
     this._cardComponent.setWatchlistClickHandler((e) => {
       e.preventDefault();
+
       const newMovie = MovieModel.clone(card);
 
       newMovie.activedWatchlist = !newMovie.activedWatchlist;
@@ -46,6 +45,7 @@ export default class MovieController {
 
     this._cardComponent.setFavoriteClickHandler((e) => {
       e.preventDefault();
+
       const newMovie = MovieModel.clone(card);
 
       newMovie.activedFavorite = !newMovie.activedFavorite;
@@ -66,57 +66,46 @@ export default class MovieController {
 
 
   openPopup(card) {
+    this._popupComponent = new PopupComponent(card, this._api);
+
+    const newMovie = MovieModel.clone(card);
+
     const onEscKeyDown = (evt) => {
-      const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+      const isEscKey = evt.key === Key.ESCAPE || evt.key === Key.ESC;
 
       if (isEscKey) {
+        this._onDataChange(this, card, newMovie);
         remove(this._popupComponent);
         document.removeEventListener(`keydown`, onEscKeyDown);
       }
     };
 
-
     return () => {
+      document.addEventListener(`keydown`, onEscKeyDown);
+
       this._onViewChange();
 
       render(body, this._popupComponent, PositionElement.BEFOREEND);
-      document.addEventListener(`keydown`, onEscKeyDown);
 
-      this._popupComponent.deleteCommentFromPopup();
+      this._popupComponent.deleteCommentFromPopup(newMovie);
       this._popupComponent.sendFormComment();
-
       this._popupComponent.closePopup(() => {
+        this._onDataChange(this, card, newMovie);
         remove(this._popupComponent);
         document.removeEventListener(`keydown`, onEscKeyDown);
       });
 
       this._popupComponent.setClickButtonWatchlist(() => {
-        const newMovie = MovieModel.clone(card);
-
         newMovie.activedWatchlist = !newMovie.activedWatchlist;
-        card.activedWatchlist = newMovie.activedWatchlist;
-
-        this._onDataChange(this, card, newMovie);
       });
 
       this._popupComponent.setClickButtonWatched(() => {
-        const newMovie = MovieModel.clone(card);
-
         newMovie.activedWatched = !newMovie.activedWatched;
-        card.activedWatched = newMovie.activedWatched;
-
-        this._onDataChange(this, card, newMovie);
       });
 
       this._popupComponent.setClickButtonFavorite(() => {
-        const newMovie = MovieModel.clone(card);
-
         newMovie.activedFavorite = !newMovie.activedFavorite;
-        card.activedFavorite = newMovie.activedFavorite;
-
-        this._onDataChange(this, card, newMovie);
       });
-
     };
   }
 

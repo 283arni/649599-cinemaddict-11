@@ -1,7 +1,7 @@
-
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import {encode} from "he";
 import {getTimeFromMins} from '../utils/changer';
+import {Key, StyleBorder} from '../consts';
 import moment from 'moment';
 
 const CAPITAL_LITTER = 0;
@@ -10,15 +10,9 @@ const PRESS_KEYS = 2;
 const TIME_ANIMATION = 600;
 const MILLISECONDS = 1000;
 
-const Key = {
-  ENTER: `Enter`,
-  CONTROL: `Control`,
-  CMD: `Command`
-};
-
 const newComment = {
-  emotion: `sleeping`,
-  comment: `Booooooooooring`,
+  emotion: ``,
+  comment: ``,
   date: `${new Date()}`
 };
 
@@ -75,7 +69,7 @@ const createItemInfo = (informations) => {
 };
 
 const createPopupDetailsTemplate = (card, options = {}) => {
-  const {title, poster, rating, description, comments, age} = card;
+  const {title, poster, rating, description, comments, age, altTitle} = card;
 
   const discussion = comments.map((comment) => {
     return createCommentTemplate(comment);
@@ -86,7 +80,6 @@ const createPopupDetailsTemplate = (card, options = {}) => {
   delete cloneCard.title;
   delete cloneCard.poster;
   delete cloneCard.rating;
-  delete cloneCard.rating;
   delete cloneCard.comments;
   delete cloneCard.description;
   delete cloneCard.activedWatchlist;
@@ -94,8 +87,8 @@ const createPopupDetailsTemplate = (card, options = {}) => {
   delete cloneCard.activedFavorite;
   delete cloneCard.emoji;
   delete cloneCard.age;
-  delete cloneCard.watching
-  ;
+  delete cloneCard.watching;
+  delete cloneCard.altTitle;
 
   const arrCard = Object.entries(cloneCard);
   const info = arrCard.map((item) => createItemInfo(item)).join(`\n`);
@@ -117,7 +110,7 @@ const createPopupDetailsTemplate = (card, options = {}) => {
           </div>
           <div class="film-details__info-wrap">
             <div class="film-details__poster">
-              <img class="film-details__poster-img" src="${poster}" alt="">
+              <img class="film-details__poster-img" src="${poster}" alt="${altTitle}">
 
               <p class="film-details__age">${setAge}</p>
             </div>
@@ -204,12 +197,8 @@ export default class Popup extends AbstractSmartComponent {
   constructor(card, api) {
     super();
 
-    this._newComment = null;
     this._card = card;
     this._api = api;
-    this._closeHandler = null;
-    this.watchedHandler = null;
-
   }
 
   getTemplate() {
@@ -221,15 +210,10 @@ export default class Popup extends AbstractSmartComponent {
     });
   }
 
-  recoveryListeners() {
-    this.closePopup(this._closeHandler);
-  }
+  recoveryListeners() {}
 
   rerender() {
     super.rerender();
-    this.sendFormComment();
-    this.deleteCommentFromPopup();
-    this.closePopup(this._closeHandler);
   }
 
   setClickButtonWatchlist(handler) {
@@ -253,13 +237,11 @@ export default class Popup extends AbstractSmartComponent {
   closePopup(handler) {
     this.getElement().querySelector(`.film-details__close-btn`)
       .addEventListener(`click`, handler);
-
-    this._closeHandler = handler;
   }
 
   shake(container, area) {
     if (area) {
-      area.style.border = `2px solid red`;
+      area.style.border = StyleBorder.ERROR;
       container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
     } else {
       container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
@@ -270,9 +252,9 @@ export default class Popup extends AbstractSmartComponent {
     }, TIME_ANIMATION);
   }
 
-  deleteCommentFromPopup() {
-
+  deleteCommentFromPopup(newMovie) {
     const reviews = this.getElement().querySelectorAll(`.film-details__comment`);
+    const countComments = this.getElement().querySelector(`.film-details__comments-count`);
 
     reviews.forEach((review) => {
       const btnDelete = review.querySelector(`.film-details__comment-delete`);
@@ -284,10 +266,9 @@ export default class Popup extends AbstractSmartComponent {
 
         this._api.deleteComment(review.id)
           .then(() => {
-            this._card.comments = filterComments(this._card.comments, review.id);
-
+            newMovie.comments = filterComments(newMovie.comments, review.id);
             review.remove();
-            this.rerender();
+            countComments.textContent = newMovie.comments.length;
           })
           .catch(() => {
             btnDelete.disabled = false;
@@ -325,12 +306,13 @@ export default class Popup extends AbstractSmartComponent {
     this.runOnKeys(textarea, () => {
       this.emoji = null;
 
-      textarea.style.border = `solid 1px #979797`;
+      textarea.style.border = StyleBorder.DEFAULT;
       textarea.setAttribute(`disabled`, true);
 
       this._api.createComment(this._card.id, newComment)
         .then((movie) => {
           this._card = movie;
+
           this.rerender();
         })
         .catch(() => {

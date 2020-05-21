@@ -1,4 +1,4 @@
-import AbstractComponent from './abstract-component';
+import AbstractSmartComponent from './abstract-smart-component';
 
 const createMostCommentsListTemplate = () => {
   return (
@@ -9,8 +9,18 @@ const createMostCommentsListTemplate = () => {
   );
 };
 
-export default class ListMost extends AbstractComponent {
+export default class ListMost extends AbstractSmartComponent {
+  constructor() {
+    super();
+  }
+
   getTemplate() {
     return createMostCommentsListTemplate();
+  }
+
+  recoveryListeners() {}
+
+  rerender() {
+    super.rerender();
   }
 }

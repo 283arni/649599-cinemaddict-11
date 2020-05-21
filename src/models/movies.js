@@ -1,6 +1,6 @@
 
 import {getMoviesByFilter} from '../utils/filter';
-import {NavItem} from '../mock/nav';
+import {NavItem} from '../consts';
 
 export default class Movies {
   constructor() {
@@ -52,7 +52,6 @@ export default class Movies {
   }
 
   _callHandlers(handlers) {
-
     handlers.forEach((handler) => handler());
   }
 }

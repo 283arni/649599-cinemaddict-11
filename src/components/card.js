@@ -1,12 +1,10 @@
 import AbstractComponent from './abstract-component';
-import MovieController from '../controllers/movie-controller';
 import {getTimeFromMins} from '../utils/changer';
 import moment from 'moment';
 
 const MAX_SIMBOLS = 140;
 
 const createMovieTamplate = (card) => {
-
   const {title, poster, genre, rating, time, description, comments, releaseDate, activedWatchlist, activedWatched, activedFavorite, altTitle} = card;
 
   const choosedWatchlist = activedWatchlist ? `film-card__controls-item--active` : ``;
@@ -21,7 +19,7 @@ const createMovieTamplate = (card) => {
       <p class="film-card__info">
         <span class="film-card__year">${moment(releaseDate).format(`YYYY`)}</span>
         <span class="film-card__duration">${getTimeFromMins(time)}</span>
-        <span class="film-card__genre">${genre}</span>
+        <span class="film-card__genre">${genre.join(`, `)}</span>
       </p>
       <img src="${poster}" alt="${altTitle}" class="film-card__poster">
       <p class="film-card__description">${slicedDescription}</p>
@@ -40,8 +38,6 @@ export default class Card extends AbstractComponent {
     super();
 
     this._card = card;
-    this._movieController = new MovieController();
-    this._submitHandler = null;
   }
 
   getTemplate() {

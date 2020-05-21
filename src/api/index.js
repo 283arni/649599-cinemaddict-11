@@ -49,7 +49,6 @@ const API = class {
       .then((response) => response.json())
       .then((response) => {
         response.movie.comments = response.comments;
-
         return response.movie;
       })
       .then(Movie.parseMovie);

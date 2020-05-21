@@ -1,10 +1,4 @@
-const Ranks = {
-  NON: ``,
-  NOVICE: `novice`,
-  FAN: `fan`,
-  MOVIE_BUFF: `movie buff`
-
-};
+import {Rank} from '../consts';
 
 export const getTimeFromMins = (mins) => {
   return `${Math.trunc(mins / 60)}h ${mins % 60}m`;
@@ -14,11 +8,11 @@ export const getRankUser = (count) => {
   let rank = ``;
 
   if (count >= 1 && count <= 10) {
-    rank = Ranks.NOVICE;
+    rank = Rank.NOVICE;
   } else if (count >= 11 && count <= 20) {
-    rank = Ranks.FAN;
+    rank = Rank.FAN;
   } else if (count >= 21) {
-    rank = Ranks.MOVIE_BUFF;
+    rank = Rank.MOVIE_BUFF;
   }
 
   return rank;

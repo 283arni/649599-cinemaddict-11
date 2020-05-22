@@ -18,6 +18,7 @@ export default class MovieController {
     this._onDataChange = onDataChange;
   }
 
+
   render(card) {
     const oldCardComponent = this._cardComponent;
 

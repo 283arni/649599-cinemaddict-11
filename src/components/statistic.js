@@ -8,11 +8,11 @@ import {intervalsWatching} from '../consts';
 const BAR_HEIGHT = 50;
 const ADD_REPEAT_GENRE = 1;
 
-const searchTopGenre = (object) => {
+const searchTopGenre = (genres) => {
   let topGenre = ``;
   let num = 0;
 
-  for (const [key, value] of object.entries()) {
+  for (const [key, value] of genres.entries()) {
 
     if (value > num) {
       topGenre = key;
@@ -209,7 +209,7 @@ export default class Statistic extends AbstractSmartComponent {
     top.textContent = `${topGenre}`;
 
     this._resetChart();
-    // Обязательно рассчитайте высоту canvas, она зависит от количества элементов диаграммы
+
     statisticCtx.height = BAR_HEIGHT * height;
     this._moviesChart = myChart(statisticCtx, newCards);
   }

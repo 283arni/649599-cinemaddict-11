@@ -1,4 +1,5 @@
 import Movie from '../models/movie';
+import {Status} from '../consts';
 
 const Method = {
   GET: `GET`,
@@ -8,11 +9,11 @@ const Method = {
 };
 
 const checkStatus = (response) => {
-  if (response.status >= 200 && response.status < 300) {
+  if (response.status >= Status.OK && response.status < Status.MULTIPLE_CHOISES) {
     return response;
-  } else {
-    throw new Error(`${response.status}: ${response.statusText}`);
   }
+
+  throw new Error(`${response.status}: ${response.statusText}`);
 };
 
 const API = class {

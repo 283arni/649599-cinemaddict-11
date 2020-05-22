@@ -220,8 +220,8 @@ export default class Popup extends AbstractSmartComponent {
   rerender() {
     super.rerender();
     this.sendFormComment();
-    this.closePopup(this._closeHandler);
-    this.deleteCommentFromPopup(this._card);
+    this.closeDetails(this._closeHandler);
+    this.deleteCommentFromDetails(this._card);
     this.setClickButtonWatchlist(this._watchlistHandler);
     this.setClickButtonWatched(this._watchedHandler);
     this.setClickButtonFavorite(this._favoriteHandler);
@@ -248,7 +248,7 @@ export default class Popup extends AbstractSmartComponent {
     this._favoriteHandler = handler;
   }
 
-  closePopup(handler) {
+  closeDetails(handler) {
     this.getElement().querySelector(`.film-details__close-btn`)
       .addEventListener(`click`, handler);
 
@@ -258,17 +258,16 @@ export default class Popup extends AbstractSmartComponent {
   shake(container, area) {
     if (area) {
       area.style.border = StyleBorder.ERROR;
-      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
-    } else {
-      container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
     }
+
+    container.style.animation = `shake ${TIME_ANIMATION / MILLISECONDS}s`;
 
     setTimeout(() => {
       container.style.animation = ``;
     }, TIME_ANIMATION);
   }
 
-  deleteCommentFromPopup(newMovie) {
+  deleteCommentFromDetails(newMovie) {
     const reviews = this.getElement().querySelectorAll(`.film-details__comment`);
     const countComments = this.getElement().querySelector(`.film-details__comments-count`);
 

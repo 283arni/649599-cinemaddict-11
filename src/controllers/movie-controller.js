@@ -87,9 +87,9 @@ export default class MovieController {
 
       render(body, this._popupComponent, PositionElement.BEFOREEND);
 
-      this._popupComponent.deleteCommentFromPopup(newMovie);
+      this._popupComponent.deleteCommentFromDetails(newMovie);
       this._popupComponent.sendFormComment();
-      this._popupComponent.closePopup(() => {
+      this._popupComponent.closeDetails(() => {
         this._onDataChange(this, card, newMovie);
         remove(this._popupComponent);
         document.removeEventListener(`keydown`, onEscKeyDown);

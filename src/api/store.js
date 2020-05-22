@@ -1,12 +1,12 @@
 export default class Store {
   constructor(key, storage) {
     this._storage = storage;
-    this._storeKey = key;
+    this._key = key;
   }
 
   getItems() {
     try {
-      return JSON.parse(this._storage.getItem(this._storeKey)) || {};
+      return JSON.parse(this._storage.getItem(this._key)) || {};
     } catch (err) {
       return {};
     }
@@ -16,7 +16,7 @@ export default class Store {
     const store = this.getItems();
 
     this._storage.setItem(
-        this._storeKey,
+        this._key,
         JSON.stringify(
             Object.assign({}, store, {
               [key]: value

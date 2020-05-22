@@ -1,4 +1,4 @@
-import FilterComponent from "../components/nav";
+import FilterComponent from "../components/filter";
 import {NavItem, STATS} from "../consts";
 import {render, replace, PositionElement} from "../utils/render.js";
 import {getMoviesByFilter} from "../utils/filter.js";

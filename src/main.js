@@ -5,8 +5,8 @@ import PageController from './controllers/page-controller';
 import MoviesModel from './models/movies';
 import ContentComponent from './components/content';
 import StatisticsComponent from './components/statistic';
-import AmountMoviesComponent from './components/amount-all-movies';
-import LoadingMovies from './components/loading-movie';
+import AmountAllMoviesComponent from './components/amount-all-movies';
+import LoadingMovies from './components/loading-movies';
 import Provider from './api/provider';
 import Store from "./api/store";
 
@@ -43,7 +43,7 @@ render(main, loadingMovies, PositionElement.BEFOREEND);
 apiWithProvider.getMovies()
   .then((cards) => {
     remove(loadingMovies);
-    render(footerStatistics, new AmountMoviesComponent(cards), PositionElement.BEFOREEND);
+    render(footerStatistics, new AmountAllMoviesComponent(cards), PositionElement.BEFOREEND);
     moviesModel.setMovies(cards);
     contentController.render();
   });

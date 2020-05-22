@@ -34,7 +34,7 @@ const createCommentTemplate = (review) => {
         <p class="film-details__comment-text">${filtredText}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
-          <span class="film-details__comment-day">${moment(new Date(date)).format(`DD/MMMM/YYYY HH:MM`)}</span>
+          <span class="film-details__comment-day">${moment(new Date(date)).format(`YYYY/MM/DD HH:MM`)}</span>
           <button class="film-details__comment-delete">Delete</button>
         </p>
       </div>

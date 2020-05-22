@@ -64,7 +64,8 @@ export default class PageController {
     this._api = api;
 
     this._showedMoviesControllers = [];
-    this._showedMoviesExtraControllers = [];
+    this._showedMoviesMostContainer = [];
+    this._showedMoviesTopContainer = [];
     this.showingCardsCount = Quantity.RENDER_MOVIES;
 
     this._buttonMoreComponent = new ButtonMoreComponent();
@@ -127,17 +128,20 @@ export default class PageController {
     const topRatedElement = document.querySelector(`.films-list--extra-top`);
     const sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.RATING, 0, this.showingCardsCount);
 
-    renderCardsInContainer(topRatedElement, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
+    const newCards = renderCardsInContainer(topRatedElement, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
+    this._showedMoviesTopContainer = newCards;
   }
 
   _renderMostComments() {
     const mostCommentsElement = this._container.getElement().querySelector(`.films-list--extra-most`);
     const sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.COMMENTS, 0, this.showingCardsCount);
 
-    renderCardsInContainer(mostCommentsElement, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
+    const newCards = renderCardsInContainer(mostCommentsElement, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
+    this._showedMoviesMostContainer = newCards;
   }
 
   _sortMoviesRender(sortType) {
+    this.showingCardsCount = Quantity.RENDER_MOVIES;
     const sortedCards = getSortedCards(this._moviesModel.getMovies(), sortType, 0, this.showingCardsCount);
 
     this._removeMovies();
@@ -213,7 +217,8 @@ export default class PageController {
 
   _onViewChange() {
     this._showedMoviesControllers.forEach((item) => item.setDefaultView());
-    this._showedMoviesExtraControllers.forEach((item) => item.setDefaultView());
+    this._showedMoviesTopContainer.forEach((item) => item.setDefaultView());
+    this._showedMoviesMostContainer.forEach((item) => item.setDefaultView());
   }
 
   _onFilterChange() {
@@ -224,10 +229,10 @@ export default class PageController {
   }
 
   _ifAllMoviesNonComments(cards) {
-    return cards.every((card) => card.comments === []);
+    return cards.every((card) => !card.comments);
   }
 
   _ifAllMoviesRatingZero(cards) {
-    return cards.every((card) => card.rating === 0);
+    return cards.every((card) => !card.rating);
   }
 }

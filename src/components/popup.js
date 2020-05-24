@@ -3,10 +3,10 @@ import {encode} from "he";
 import {getTimeFromMins} from '../utils/changer';
 import {Key, StyleBorder} from '../consts';
 import moment from 'moment';
+import {remove} from '../utils/render';
 
 const CAPITAL_LITTER = 0;
 const FROM_SLICE_STRING = 1;
-const PRESS_KEYS = 2;
 const TIME_ANIMATION = 600;
 const MILLISECONDS = 1000;
 
@@ -90,8 +90,8 @@ const createPopupDetailsTemplate = (card, options = {}) => {
   delete cloneCard.watching;
   delete cloneCard.altTitle;
 
-  const arrCard = Object.entries(cloneCard);
-  const info = arrCard.map((item) => createItemInfo(item)).join(`\n`);
+  const details = Object.entries(cloneCard);
+  const info = details.map((detail) => createItemInfo(detail)).join(`\n`);
 
   const {activedWatchlist, activedWatched, activedFavorite, emotion} = options;
 
@@ -199,7 +199,7 @@ export default class Popup extends AbstractSmartComponent {
 
     this._card = card;
     this._api = api;
-
+    // this._onEscKeyDown = onEscKeyDown;
     this._closeHandler = null;
     this._watchlistHandler = null;
     this._watchedHandler = null;
@@ -248,9 +248,13 @@ export default class Popup extends AbstractSmartComponent {
     this._favoriteHandler = handler;
   }
 
-  closeDetails(handler) {
+  closeDetails(handler, onEscKeyDown) {
     this.getElement().querySelector(`.film-details__close-btn`)
-      .addEventListener(`click`, handler);
+      .addEventListener(`click`, () => {
+        handler();
+        remove(this);
+        document.removeEventListener(`keydown`, onEscKeyDown);
+      });
 
     this._closeHandler = handler;
   }
@@ -299,7 +303,7 @@ export default class Popup extends AbstractSmartComponent {
     const element = this.getElement();
     const emojies = element.querySelectorAll(`.film-details__emoji-label`);
     const emojiDiv = element.querySelector(`.film-details__add-emoji-label`);
-    const elemNewComment = element.querySelector(`.film-details__new-comment`);
+    const blockNewComment = element.querySelector(`.film-details__new-comment`);
     const textarea = element.querySelector(`textarea`);
 
 
@@ -332,7 +336,7 @@ export default class Popup extends AbstractSmartComponent {
         })
         .catch(() => {
           textarea.disabled = false;
-          this.shake(elemNewComment, textarea);
+          this.shake(blockNewComment, textarea);
         });
     });
 
@@ -343,24 +347,8 @@ export default class Popup extends AbstractSmartComponent {
   }
 
   runOnKeys(elem, addComment) {
-    const keysPressed = new Set();
-
     elem.addEventListener(`keydown`, (event) => {
-      keysPressed.delete(event.key);
-      if (event.key === Key.CONTROL || event.key === Key.CMD) {
-        keysPressed.add(event.key);
-      }
-    });
-
-    elem.addEventListener(`keyup`, (event) => {
-      keysPressed.delete(event.key);
-      if (event.key === Key.ENTER) {
-        keysPressed.add(event.key);
-
-        if (keysPressed.size < PRESS_KEYS) {
-          return;
-        }
-
+      if ((event.metaKey || event.ctrlKey) && event.key === Key.ENTER) {
         addComment();
       }
     });

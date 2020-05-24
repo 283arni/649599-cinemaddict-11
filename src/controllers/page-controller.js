@@ -16,7 +16,7 @@ const header = document.querySelector(`.header`);
 const renderCardsInContainer = (component, movies, onDataChange, onViewChange, api, inContainer = false) => {
   let container = null;
   let elementContainer = null;
-  // Проверка куда рендерить
+
   if (!inContainer) {
     container = new ContainerComponent();
     elementContainer = container.getElement();
@@ -125,18 +125,18 @@ export default class PageController {
   }
 
   _renderTopRated() {
-    const topRatedElement = document.querySelector(`.films-list--extra-top`);
+    const topRated = document.querySelector(`.films-list--extra-top`);
     const sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.RATING, 0, this.showingCardsCount);
 
-    const newCards = renderCardsInContainer(topRatedElement, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
+    const newCards = renderCardsInContainer(topRated, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
     this._showedMoviesTopContainer = newCards;
   }
 
   _renderMostComments() {
-    const mostCommentsElement = this._container.getElement().querySelector(`.films-list--extra-most`);
+    const mostComments = this._container.getElement().querySelector(`.films-list--extra-most`);
     const sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.COMMENTS, 0, this.showingCardsCount);
 
-    const newCards = renderCardsInContainer(mostCommentsElement, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
+    const newCards = renderCardsInContainer(mostComments, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);
     this._showedMoviesMostContainer = newCards;
   }
 
@@ -183,9 +183,7 @@ export default class PageController {
   }
 
   _updateMovies(count) {
-    const movies = this._moviesModel.getMovies();
-
-    this._sortComponent.setActiveSort(SortType.DEFAULT);
+    const movies = getSortedCards(this._moviesModel.getMovies(), this._sortComponent.getSortType());
     this._removeMovies();
     this._renderMovies(movies.slice(0, count));
     this._rankComponent.rerender();
@@ -218,7 +216,6 @@ export default class PageController {
     const newMovies = renderCardsInContainer(this._container, movies, this._onDataChange, this._onViewChange, this._api, true);
 
     this._showedMoviesControllers = this._showedMoviesControllers.concat(newMovies);
-    // this._showedCardsCount = this._showedMoviesControllers.length;
   }
 
   _onViewChange() {
@@ -231,7 +228,7 @@ export default class PageController {
     this.showingCardsCount = Quantity.RENDER_MOVIES;
 
     this._updateMovies(this.showingCardsCount);
-    this._sortComponent.setActiveSort(SortType.DEFAULT);
+    this._sortComponent.setActiveSort(SortType.DEFAULT, this._sortMoviesRender);
   }
 
   _ifAllMoviesNonComments(cards) {

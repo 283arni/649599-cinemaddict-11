@@ -11,9 +11,7 @@ export const Quantity = {
 export const Key = {
   ESC: `Esc`,
   ESCAPE: `Escape`,
-  ENTER: `Enter`,
-  CONTROL: `Control`,
-  CMD: `Command`
+  ENTER: `Enter`
 };
 
 export const NavItem = {

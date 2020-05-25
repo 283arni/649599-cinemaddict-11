@@ -68,12 +68,10 @@ export default class MovieController {
   openPopup(popup, card) {
     let newMovie = MovieModel.clone(card);
 
-
     const changeMovieClickButtonDetails = (film) => {
       this._api.getComments(film)
         .then((movie) => this._onDataChange(this, card, movie));
     };
-
 
     const onEscKeyDown = (evt) => {
       const isEscKey = evt.key === Key.ESCAPE || evt.key === Key.ESC;
@@ -87,12 +85,17 @@ export default class MovieController {
 
     return () => {
       this._onViewChange();
+      const opnedDetailsMove = document.querySelector(`.film-details`);
+
+      if (opnedDetailsMove) {
+        return;
+      }
 
       render(body, popup, PositionElement.BEFOREEND);
 
       document.addEventListener(`keydown`, onEscKeyDown);
 
-      this._popupComponent.deleteCommentFromDetails(newMovie);
+      this._popupComponent.deleteCommentFromDetails(card);
       this._popupComponent.sendFormComment();
       this._popupComponent.closeDetails(() => {
         changeMovieClickButtonDetails(newMovie);

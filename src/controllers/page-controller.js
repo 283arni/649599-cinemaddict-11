@@ -125,7 +125,7 @@ export default class PageController {
   }
 
   _renderTopRated() {
-    const topRated = document.querySelector(`.films-list--extra-top`);
+    const topRated = this._container.getElement().querySelector(`.films-list--extra-top`);
     const sortedCards = getSortedCards(this._moviesModel.getMovies(), SortType.RATING, 0, this.showingCardsCount);
 
     const newCards = renderCardsInContainer(topRated, sortedCards.slice(0, Quantity.MOVIES_EXTRA), this._onDataChange, this._onViewChange, this._api);

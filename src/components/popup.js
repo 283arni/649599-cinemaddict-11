@@ -199,7 +199,7 @@ export default class Popup extends AbstractSmartComponent {
 
     this._card = card;
     this._api = api;
-    // this._onEscKeyDown = onEscKeyDown;
+
     this._closeHandler = null;
     this._watchlistHandler = null;
     this._watchedHandler = null;
@@ -321,7 +321,6 @@ export default class Popup extends AbstractSmartComponent {
       });
     });
 
-    // добавление нового коммента при нажатии Ctrl + Enter
     this.runOnKeys(textarea, () => {
       this.emoji = null;
 

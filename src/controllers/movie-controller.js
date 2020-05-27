@@ -87,6 +87,7 @@ export default class MovieController {
 
       render(body, this._popupComponent, PositionElement.BEFOREEND);
 
+
       this._popupComponent.deleteCommentFromPopup(newMovie);
       this._popupComponent.sendFormComment();
       this._popupComponent.closePopup(() => {

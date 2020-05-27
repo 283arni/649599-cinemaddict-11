@@ -20,8 +20,8 @@ export default class MovieController {
 
   render(card) {
     const oldCardComponent = this._cardComponent;
-
     this._cardComponent = new CardComponent(card);
+    this._popupComponent = new PopupComponent(card, this._api);
 
     this._cardComponent.setWatchlistClickHandler((e) => {
       e.preventDefault();
@@ -59,53 +59,62 @@ export default class MovieController {
       render(this._container, this._cardComponent, PositionElement.BEFOREEND);
     }
 
-    this._cardComponent.setClickPoster(this.openPopup(card));
-    this._cardComponent.setClickTitle(this.openPopup(card));
-    this._cardComponent.setClickComments(this.openPopup(card));
+    this._cardComponent.setClickPoster(this.openPopup(this._popupComponent, card));
+    this._cardComponent.setClickTitle(this.openPopup(this._popupComponent, card));
+    this._cardComponent.setClickComments(this.openPopup(this._popupComponent, card));
   }
 
 
-  openPopup(card) {
-    this._popupComponent = new PopupComponent(card, this._api);
+  openPopup(popup, card) {
+    let newMovie = MovieModel.clone(card);
 
-    const newMovie = MovieModel.clone(card);
+    const changeMovieClickButtonDetails = (film) => {
+      this._api.getComments(film)
+        .then((movie) => this._onDataChange(this, card, movie));
+    };
 
     const onEscKeyDown = (evt) => {
       const isEscKey = evt.key === Key.ESCAPE || evt.key === Key.ESC;
 
       if (isEscKey) {
-        this._onDataChange(this, card, newMovie);
-        remove(this._popupComponent);
+        changeMovieClickButtonDetails(newMovie);
+        remove(popup);
         document.removeEventListener(`keydown`, onEscKeyDown);
       }
     };
 
     return () => {
+      this._onViewChange();
+      const opnedDetailsMove = document.querySelector(`.film-details`);
+
+      if (opnedDetailsMove) {
+        return;
+      }
+
+      render(body, popup, PositionElement.BEFOREEND);
+
       document.addEventListener(`keydown`, onEscKeyDown);
 
-      this._onViewChange();
-
-      render(body, this._popupComponent, PositionElement.BEFOREEND);
-
-
-      this._popupComponent.deleteCommentFromPopup(newMovie);
+      this._popupComponent.deleteCommentFromDetails(card);
       this._popupComponent.sendFormComment();
-      this._popupComponent.closePopup(() => {
-        this._onDataChange(this, card, newMovie);
-        remove(this._popupComponent);
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      });
+      this._popupComponent.closeDetails(() => {
+        changeMovieClickButtonDetails(newMovie);
+      }, onEscKeyDown);
+
 
       this._popupComponent.setClickButtonWatchlist(() => {
         newMovie.activedWatchlist = !newMovie.activedWatchlist;
+        changeMovieClickButtonDetails(newMovie);
       });
 
       this._popupComponent.setClickButtonWatched(() => {
         newMovie.activedWatched = !newMovie.activedWatched;
+        changeMovieClickButtonDetails(newMovie);
       });
 
       this._popupComponent.setClickButtonFavorite(() => {
         newMovie.activedFavorite = !newMovie.activedFavorite;
+        changeMovieClickButtonDetails(newMovie);
       });
     };
   }

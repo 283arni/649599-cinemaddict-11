@@ -1,21 +1,25 @@
-import {Rank} from '../consts';
+import {Rank, RankNumber} from '../consts';
+
+const TIME_FOR_CALCULATE = 60;
 
 export const getTimeFromMins = (mins) => {
-  return `${Math.trunc(mins / 60)}h ${mins % 60}m`;
+  return `${Math.trunc(mins / TIME_FOR_CALCULATE)}h ${mins % TIME_FOR_CALCULATE}m`;
 };
 
 export const getRankUser = (count) => {
-  let rank = ``;
-
-  if (count >= 1 && count <= 10) {
-    rank = Rank.NOVICE;
-  } else if (count >= 11 && count <= 20) {
-    rank = Rank.FAN;
-  } else if (count >= 21) {
-    rank = Rank.MOVIE_BUFF;
+  if (count >= RankNumber.NOVICE_MIN && count <= RankNumber.NOVICE_MAX) {
+    return Rank.NOVICE;
   }
 
-  return rank;
+  if (count >= RankNumber.FAN_MIN && count <= RankNumber.FAN_MAX) {
+    return Rank.FAN;
+  }
+
+  if (count >= RankNumber.BUFF) {
+    return Rank.MOVIE_BUFF;
+  }
+
+  return Rank.NON;
 };
 
 export const watchedMovies = (cards) => {

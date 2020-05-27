@@ -27,6 +27,10 @@ export default class Provider {
     return Promise.resolve(Movie.parseMovies(storeMovies));
   }
 
+  getComments(movie) {
+    return this._api.getComments(movie);
+  }
+
   createComment(id, comment) {
     if (isOnline()) {
       return this._api.createComment(id, comment);

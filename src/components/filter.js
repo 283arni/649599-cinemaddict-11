@@ -1,6 +1,6 @@
 import AbstractComponent from './abstract-component';
 
-const setActiveClass = function (evt, element) {
+const setActiveClass = (evt, element) => {
   const filtersList = element.querySelectorAll(`a`);
 
   filtersList.forEach((filter) => {
@@ -21,8 +21,8 @@ const creatNavItemTemplate = (tab, filter) => {
   );
 };
 
-const createStatisticTamplate = (array, filter) => {
-  const menuItems = array.map((item) => creatNavItemTemplate(item, filter)).join(`\n`);
+const createFilterTamplate = (list, filter) => {
+  const menuItems = list.map((item) => creatNavItemTemplate(item, filter)).join(`\n`);
 
   return (
     `<nav class="main-navigation">
@@ -34,7 +34,7 @@ const createStatisticTamplate = (array, filter) => {
   );
 };
 
-export default class Navigation extends AbstractComponent {
+export default class Filter extends AbstractComponent {
   constructor(navItems, activeFilter) {
     super();
 
@@ -43,7 +43,7 @@ export default class Navigation extends AbstractComponent {
   }
 
   getTemplate() {
-    return createStatisticTamplate(this._navs, this._activeFilter);
+    return createFilterTamplate(this._navs, this._activeFilter);
   }
 
   setFilterChangeHandler(handler) {

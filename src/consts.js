@@ -11,9 +11,7 @@ export const Quantity = {
 export const Key = {
   ESC: `Esc`,
   ESCAPE: `Escape`,
-  ENTER: `Enter`,
-  CONTROL: `Control`,
-  CMD: `Command`
+  ENTER: `Enter`
 };
 
 export const NavItem = {
@@ -43,3 +41,15 @@ export const StyleBorder = {
   DEFAULT: `solid 1px #979797`
 };
 
+export const RankNumber = {
+  NOVICE_MIN: 1,
+  NOVICE_MAX: 10,
+  FAN_MIN: 11,
+  FAN_MAX: 20,
+  BUFF: 21
+};
+
+export const Status = {
+  OK: 200,
+  MULTIPLE_CHOISES: 300
+};

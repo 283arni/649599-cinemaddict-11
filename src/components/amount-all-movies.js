@@ -4,7 +4,7 @@ const craeteAmountMoviesTemplate = (cards) => {
   return `<p>${cards.length} movies inside</p>`;
 };
 
-export default class AmountMovies extends AbstractComponent {
+export default class AmountAllMovies extends AbstractComponent {
   constructor(movies) {
     super();
 

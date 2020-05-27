@@ -95,6 +95,7 @@ export default class MovieController {
 
       document.addEventListener(`keydown`, onEscKeyDown);
 
+
       this._popupComponent.deleteCommentFromDetails(card);
       this._popupComponent.sendFormComment();
       this._popupComponent.closeDetails(() => {

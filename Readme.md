@@ -1,13 +1,13 @@
 # Проект «Киноман»
 ---
 ### Проект содержит:
-HTML
-CSS
-JavaScript
-[moment.js](https://momentjs.com/)
+ * HTML
+ * CSS
+ * JavaScript
+ * [moment.js](https://momentjs.com/)
 ---
 ### Запуск проекта:
-Устанавливаем Node.js
-Клонируем репозиторий git clone "ссылка репозитория" или просто скачиваем архив.
-npm i
-npm start для запуска проекта
+ 1. Устанавливаем Node.js
+ 2. Клонируем репозиторий git clone "ссылка репозитория" или просто скачиваем архив.
+ 3. npm i
+ 4. npm start для запуска проекта
